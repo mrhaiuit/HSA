@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<!-- saved from url=(0037)https://quy-trinh-thuc-te.vercel.app/ -->
+<html lang="vi"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>HSA Education – Quy trình vận hành thực tế &amp; lộ trình nâng cấp</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --f:'Be Vietnam Pro',sans-serif;
+  --bg:#F8F8F6;--black:#2C2C2A;--lane:#6B6967;--div:#D3D1C7;
+  --p-bg:#EEEDFE;--p-tx:#3C3489;--p-bd:#AFA9EC;
+  --b-bg:#E6F1FB;--b-tx:#0C447C;--b-bd:#85B7EB;
+  --t-bg:#E1F5EE;--t-tx:#085041;--t-bd:#5DCAA5;
+  --g-bg:#EAF3DE;--g-tx:#27500A;--g-bd:#97C459;
+  --c-bg:#FAECE7;--c-tx:#712B13;--c-bd:#F0997B;
+  --k-bg:#FBEAF0;--k-tx:#72243E;--k-bd:#ED93B1;
+  --a-bg:#FAEEDA;--a-tx:#633806;--a-bd:#EF9F27;
+  --m-bg:#F0EEE8;--m-tx:#6B6967;--m-bd:#C4C1B8;
+  --now-bg:#FFF8E6;--now-bd:#F5C842;--now-tx:#7A5800;
+  --r:8px;
+}
+body{font-family:var(--f);background:var(--bg);color:var(--black);padding:28px 20px 60px;}
+.page{max-width:840px;margin:0 auto;}
+
+/* Header */
+.hdr{text-align:center;margin-bottom:20px;}
+.hdr h1{font-size:20px;font-weight:800;letter-spacing:-.3px;margin-bottom:5px;}
+.hdr p{font-size:12px;color:var(--lane);}
+
+/* Legend */
+.legend{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:22px;}
+.leg{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;}
+.leg-now{background:#FFF8E6;color:#7A5800;border:1.5px solid #F5C842;}
+.leg-auto{background:var(--g-bg);color:var(--g-tx);border:1px solid var(--g-bd);}
+.leg-manual{background:var(--m-bg);color:var(--m-tx);border:1px dashed var(--m-bd);}
+.leg-next{background:var(--b-bg);color:var(--b-tx);border:1px dashed var(--b-bd);opacity:.8;}
+
+/* Section */
+.section{border-radius:12px;border:1px solid var(--div);margin-bottom:4px;overflow:hidden;}
+.sec-head{display:flex;align-items:center;gap:8px;padding:7px 14px 6px;border-bottom:1px solid var(--div);}
+.sec-num{font-size:13px;font-weight:800;}
+.sec-title{font-size:11.5px;font-weight:700;color:var(--lane);text-transform:uppercase;letter-spacing:.06em;}
+.sec-body{padding:12px 16px 12px;}
+
+/* Node */
+.node{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  border-radius:var(--r);padding:8px 12px;text-align:center;border:1px solid transparent;}
+.node b{font-size:12px;font-weight:700;line-height:1.3;}
+.node small{font-size:10.5px;font-weight:400;opacity:.78;margin-top:2px;line-height:1.35;}
+/* node states */
+.node.now{border-width:1.5px;}
+.node.manual{border-style:dashed;}
+.node.next{opacity:.55;border-style:dashed;}
+
+/* colours */
+.np{background:var(--p-bg);color:var(--p-tx);border-color:var(--p-bd);}
+.nb{background:var(--b-bg);color:var(--b-tx);border-color:var(--b-bd);}
+.nt{background:var(--t-bg);color:var(--t-tx);border-color:var(--t-bd);}
+.ng{background:var(--g-bg);color:var(--g-tx);border-color:var(--g-bd);}
+.nc{background:var(--c-bg);color:var(--c-tx);border-color:var(--c-bd);}
+.nk{background:var(--k-bg);color:var(--k-tx);border-color:var(--k-bd);}
+.na{background:var(--a-bg);color:var(--a-tx);border-color:var(--a-bd);}
+.nm{background:var(--m-bg);color:var(--m-tx);border-color:var(--m-bd);}
+.nnow{background:var(--now-bg);color:var(--now-tx);border-color:var(--now-bd);}
+
+/* section bg */
+.sbg-p{background:#F7F6FF;}
+.sbg-b{background:#F2F7FF;}
+.sbg-t{background:#F0FBF7;}
+.sbg-g{background:#F3FAF0;}
+.sbg-b2{background:#EEF4FF;}
+.sbg-c{background:#FEF7F5;}
+.sbg-k{background:#FDF5F8;}
+
+/* layout */
+.row{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:nowrap;}
+.col{display:flex;flex-direction:column;align-items:center;}
+.ar{color:#B0ADA6;font-size:15px;padding:0 4px;flex-shrink:0;}
+.ar-d{color:#B0ADA6;font-size:14px;display:block;text-align:center;margin:3px 0;line-height:1;}
+.ar-lbl{font-size:10px;font-weight:600;color:var(--t-tx);display:block;text-align:center;}
+
+/* diamond decision */
+.diamond{position:relative;width:80px;height:80px;flex-shrink:0;}
+.diamond-sq{position:absolute;inset:11px;background:var(--t-bg);border:1.5px solid var(--t-bd);border-radius:4px;transform:rotate(45deg);}
+.diamond-tx{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--t-tx);text-align:center;line-height:1.3;}
+
+/* badge */
+.badge{border-radius:6px;padding:6px 12px;font-size:11.5px;font-weight:600;margin:5px 0;text-align:center;width:100%;}
+.bg-g{background:var(--g-bg);color:var(--g-tx);border:1px solid var(--g-bd);}
+.bg-b{background:var(--b-bg);color:var(--b-tx);border:1px solid var(--b-bd);}
+.bg-a{background:var(--a-bg);color:var(--a-tx);border:1px solid var(--a-bd);}
+.bg-k{background:var(--k-bg);color:var(--k-tx);border:1px dashed var(--k-bd);}
+.bg-now{background:var(--now-bg);color:var(--now-tx);border:1.5px solid var(--now-bd);}
+.bg-p{background:var(--p-bg);color:var(--p-tx);border:1px solid var(--p-bd);}
+
+/* now-tag inline */
+.tag{display:inline-block;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle;}
+.tag-now{background:#FFF8E6;color:#7A5800;border:1px solid #F5C842;}
+.tag-auto{background:var(--g-bg);color:var(--g-tx);border:1px solid var(--g-bd);}
+.tag-next{background:var(--b-bg);color:var(--b-tx);border:1px dashed var(--b-bd);}
+
+.sep{border:none;border-top:1px dashed var(--div);margin:8px 0;}
+.between{display:flex;flex-direction:column;align-items:center;height:24px;justify-content:center;}
+
+/* compare */
+.compare{border-radius:10px;border:1px solid var(--div);margin-top:28px;overflow:hidden;}
+.compare-hd{text-align:center;font-size:13px;font-weight:700;padding:9px;background:var(--m-bg);border-bottom:1px solid var(--div);}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr 1fr;}
+.cc{padding:12px 14px;}
+.cc:not(:last-child){border-right:1px solid var(--div);}
+.cc.c1{background:#FFF8E6;}
+.cc.c2{background:var(--b-bg);opacity:.9;}
+.cc.c3{background:var(--g-bg);opacity:.9;}
+.cc h3{font-size:11px;font-weight:700;margin-bottom:7px;}
+.cc li{font-size:10.5px;list-style:none;line-height:1.8;color:var(--lane);}
+
+.footer{text-align:center;font-size:11px;color:var(--lane);margin-top:20px;}
+
+@media(max-width:600px){
+  .row{flex-wrap:wrap;gap:6px;}
+  .node{flex:1;min-width:120px;}
+  .compare-grid{grid-template-columns:1fr;}
+  .cc:not(:last-child){border-right:none;border-bottom:1px solid var(--div);}
+}
+@media print{body{background:#fff;}*{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+</style>
+</head>
+<body cz-shortcut-listen="true">
+<div class="page">
+
+<div class="hdr">
+  <h1>Quy Trình Vận Hành – HSA Education</h1>
+  <p>Thực tế hiện tại &nbsp;+&nbsp; Lộ trình nâng cấp theo phase</p>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <span class="leg leg-now">⚡ Đang làm – giữ nguyên</span>
+  <span class="leg leg-auto">🤖 Tự động hoá ngay (Phase 1)</span>
+  <span class="leg leg-manual">✋ Thủ công – cần tối ưu</span>
+  <span class="leg leg-next">→ Nâng cấp Phase 2–3</span>
+</div>
+
+<!-- ① MARKETING -->
+<div class="section sbg-p">
+  <div class="sec-head sbg-p">
+    <span class="sec-num" style="color:var(--p-tx)">①</span>
+    <span class="sec-title">Marketing</span>
+  </div>
+  <div class="sec-body">
+    <div class="row">
+      <div class="node np now"><b>⚡ Chạy Ads</b><small>FB / TikTok / GG</small></div>
+      <span class="ar">→</span>
+      <div class="node np now"><b>⚡ Landing page</b><small>Form đăng ký / tư vấn</small></div>
+      <span class="ar">→</span>
+      <div class="node nm manual"><b>✋ Nhập lead vào EZSale</b><small>Sale nhập thủ công</small></div>
+    </div>
+    <div class="badge bg-a" style="margin-top:8px;">→ Phase 2: Form landing page tự đẩy lead vào EZSale CRM — bỏ nhập tay</div>
+  </div>
+</div>
+
+<div class="between"><span class="ar-d">↓</span></div>
+
+<!-- ② CRM & SALE -->
+<div class="section sbg-b">
+  <div class="sec-head sbg-b">
+    <span class="sec-num" style="color:var(--b-tx)">②</span>
+    <span class="sec-title">CRM &amp; Sale</span>
+  </div>
+  <div class="sec-body">
+    <div class="col">
+      <div class="node nt now" style="width:260px;"><b>⚡ EZSale theo dõi lead</b><small>Sale quản lý trạng thái Hot / Warm / Cold</small></div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:0;margin-top:3px;">
+      <div style="flex:1;text-align:center;"><span style="font-size:10px;color:var(--lane);font-weight:600;">Hot ↓</span></div>
+      <div style="flex:1;text-align:center;"><span style="font-size:10px;color:var(--lane);font-weight:600;">Warm ↓</span></div>
+      <div style="flex:1;text-align:center;"><span style="font-size:10px;color:var(--lane);font-weight:600;">Cold ↓</span></div>
+    </div>
+    <div class="row" style="gap:8px;align-items:flex-start;margin-bottom:6px;">
+      <div class="node nb now" style="flex:1;"><b>⚡ Sale gọi điện / nhắn tin</b><small>Tư vấn, chốt sale trực tiếp</small></div>
+      <div class="node nm manual" style="flex:1;"><b>✋ Nhắn tin nhắc thủ công</b><small>Chưa có chuỗi tự động</small></div>
+      <div class="node nm manual" style="flex:1;"><b>✋ Bỏ sót hoặc gọi lại tay</b><small>Chưa có retarget tự động</small></div>
+    </div>
+    <div class="badge bg-a">→ Phase 2: Zalo OA tự động nurture Warm/Cold — sale tập trung Hot</div>
+    <span class="ar-d" style="margin-top:4px;">↓</span>
+    <div class="col">
+      <div class="node nb now" style="width:280px;margin-top:2px;"><b>⚡ Sale gửi link giỏ hàng</b><small>Qua Zalo / tin nhắn trực tiếp</small></div>
+    </div>
+  </div>
+</div>
+
+<div class="between"><span class="ar-d">↓</span></div>
+
+<!-- ③ THANH TOÁN -->
+<div class="section sbg-t">
+  <div class="sec-head sbg-t">
+    <span class="sec-num" style="color:var(--t-tx)">③</span>
+    <span class="sec-title">Thanh toán</span>
+  </div>
+  <div class="sec-body">
+    <div class="row">
+      <div class="node nt now"><b>⚡ Học sinh vào web đặt hàng</b><small>Form đăng ký + thanh toán online</small></div>
+      <span class="ar">→</span>
+      <div class="node nt now"><b>⚡ Chuyển khoản / cổng TT</b><small>Đã thanh toán qua web</small></div>
+      <span class="ar">→</span>
+      <div class="node ng now"><b>⚡ SePay Webhook</b><small>Xác nhận tự động – đang chạy ổn định</small></div>
+      <span class="ar">→</span>
+      <div class="diamond">
+        <div class="diamond-sq"></div>
+        <div class="diamond-tx">Thanh<br>toán OK?</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:0 40px;margin-top:4px;">
+      <span style="font-size:10px;font-weight:600;color:var(--t-tx);">✓ Có ↓</span>
+      <span style="font-size:10px;font-weight:600;color:var(--c-tx);">✕ Không →</span>
+    </div>
+    <div class="row" style="justify-content:flex-end;margin-top:2px;">
+      <div class="node nc manual" style="width:210px;margin-right:20px;"><b>✋ Sale nhắn nhắc thủ công</b><small>→ Phase 2: Zalo OA tự động nhắc</small></div>
+    </div>
+    <div class="badge bg-g" style="margin-top:6px;">✅ SePay Webhook đang chạy ổn định — xác nhận thanh toán tự động, không cần kiểm tra thủ công</div>
+  </div>
+</div>
+
+<div class="between"><span class="ar-d">↓</span><span class="ar-lbl">✓ Thanh toán xác nhận</span></div>
+
+<!-- ④ ONBOARDING -->
+<div class="section sbg-g">
+  <div class="sec-head sbg-g">
+    <span class="sec-num" style="color:var(--g-tx)">④</span>
+    <span class="sec-title">Onboarding học sinh</span>
+  </div>
+  <div class="sec-body">
+    <!-- Hiện tại -->
+    <div class="badge bg-now" style="margin-bottom:8px;">⚡ Luồng đang làm hiện tại</div>
+    <div class="row" style="gap:8px;align-items:flex-start;margin-bottom:6px;">
+      <div class="node nm manual" style="flex:1;"><b>✋ Sale tạo nhóm Zalo với QLL</b><small>Báo học sinh đã thanh toán</small></div>
+      <div class="node nm manual" style="flex:1;"><b>✋ QLL kiểm tra &amp; duyệt</b><small>Xem thông tin, cho vào lớp</small></div>
+      <div class="node nnow now" style="flex:1;"><b>⚡ QLL thêm vào nhóm Zalo lớp</b><small>Nhóm lớp chính để học</small></div>
+    </div>
+    <div class="row" style="gap:8px;align-items:flex-start;">
+      <div class="node nnow now" style="flex:1;"><b>⚡ Nhóm Zalo: hướng dẫn onboard</b><small>QLL gửi link, SBD, tài liệu</small></div>
+      <div class="node nm manual" style="flex:1;"><b>✋ Học sinh tự làm theo hướng dẫn</b><small>Hỏi lại nếu không hiểu</small></div>
+      <div class="node nnow now" style="flex:1;"><b>⚡ QLL hỗ trợ từng trường hợp</b><small>Trong nhóm Zalo</small></div>
+    </div>
+
+    <hr class="sep">
+
+    <!-- Nâng cấp -->
+    <div class="badge bg-g">🤖 Phase 1: Tự động hoá onboarding — giảm 80% việc thủ công QLL</div>
+    <div class="row" style="gap:8px;align-items:flex-start;margin-top:6px;">
+      <div class="node ng next" style="flex:1;"><b>→ Email xác nhận tự động</b><small>Gửi ngay sau thanh toán</small></div>
+      <div class="node ng next" style="flex:1;"><b>→ Zalo OA gửi hướng dẫn</b><small>SBD, link nhóm, tài liệu</small></div>
+      <div class="node na next" style="flex:1;"><b>→ QLL duyệt 1 click</b><small>Dashboard, không nhắn tay</small></div>
+    </div>
+  </div>
+</div>
+
+<div class="between"><span class="ar-d">↓</span></div>
+
+<!-- ⑤ HỌC TẬP -->
+<div class="section sbg-b2">
+  <div class="sec-head sbg-b2">
+    <span class="sec-num" style="color:var(--b-tx)">⑤</span>
+    <span class="sec-title">Học tập</span>
+  </div>
+  <div class="sec-body">
+    <!-- Hiện tại -->
+    <div class="badge bg-now" style="margin-bottom:8px;">⚡ Luồng đang làm hiện tại – dùng Zoom + Zalo</div>
+    <div class="row" style="gap:8px;align-items:flex-start;margin-bottom:6px;">
+      <div class="node nnow now" style="flex:1;"><b>⚡ QLL gửi link Zoom hàng ngày</b><small>Trong nhóm Zalo lớp</small></div>
+      <div class="node nnow now" style="flex:1;"><b>⚡ Giáo viên dạy trên Zoom</b><small>Học sinh tham gia qua link</small></div>
+      <div class="node nnow now" style="flex:1;"><b>⚡ Tài liệu gửi qua Zalo / web</b><small>Học sinh tự tải về</small></div>
+    </div>
+    <div class="row" style="gap:8px;align-items:flex-start;">
+      <div class="node nm manual" style="flex:1;"><b>✋ Điểm danh thủ công</b><small>Chưa có hệ thống tự động</small></div>
+      <div class="node nm manual" style="flex:1;"><b>✋ Hỏi đáp trong nhóm Zalo</b><small>GV + QLL trả lời trực tiếp</small></div>
+      <div class="node nm manual" style="flex:1;"><b>✋ QLL gửi link lại khi bị miss</b><small>Xử lý từng trường hợp tay</small></div>
+    </div>
+
+    <hr class="sep">
+    <div class="badge bg-a">→ Phase 2: Chuyển sang ClassIn — tự động link học, điểm danh, tài liệu</div>
+    <div class="row" style="gap:8px;margin-top:6px;">
+      <div class="node nb next" style="flex:1;"><b>→ ClassIn: link học cố định</b><small>Không cần gửi hàng ngày</small></div>
+      <div class="node nb next" style="flex:1;"><b>→ Điểm danh tự động</b><small>Dashboard QLL realtime</small></div>
+      <div class="node nb next" style="flex:1;"><b>→ Tài liệu tổ chức trên ClassIn</b><small>Upload 1 lần, dùng mọi lớp</small></div>
+    </div>
+  </div>
+</div>
+
+<div class="between"><span class="ar-d">↓</span></div>
+
+<!-- ⑥ CHĂM SÓC -->
+<div class="section sbg-c">
+  <div class="sec-head sbg-c">
+    <span class="sec-num" style="color:var(--c-tx)">⑥</span>
+    <span class="sec-title">Chăm sóc học viên</span>
+  </div>
+  <div class="sec-body">
+    <div class="badge bg-now" style="margin-bottom:8px;">⚡ Luồng đang làm hiện tại</div>
+    <div class="row" style="gap:8px;align-items:flex-start;margin-bottom:6px;">
+      <div class="node nnow now" style="flex:1;"><b>⚡ Hỏi đáp trong nhóm Zalo lớp</b><small>GV + QLL phản hồi trực tiếp</small></div>
+      <div class="node nm manual" style="flex:1;"><b>✋ Nhắc nhở học sinh thủ công</b><small>QLL nhắn từng người nếu vắng</small></div>
+      <div class="node nm manual" style="flex:1;"><b>✋ Chưa có khảo sát định kỳ</b><small>Phản hồi rời rạc, không hệ thống</small></div>
+    </div>
+
+    <hr class="sep">
+    <div class="badge bg-a">→ Phase 2: Tự động hoá chăm sóc — Zalo OA chuỗi nhắc lịch, hỗ trợ</div>
+    <div class="row" style="gap:8px;margin-top:6px;align-items:flex-start;">
+      <div class="node nc next" style="flex:1;"><b>→ Zalo OA nhắc lịch học</b><small>Gửi tự động theo lịch cố định</small></div>
+      <div class="node nc next" style="flex:1;"><b>→ Chatbot hỏi đáp cơ bản</b><small>Zalo OA trả lời câu hỏi thường gặp</small></div>
+      <div class="node na next" style="flex:1;"><b>→ NPS định kỳ tự động</b><small>2 tuần / 1 lần — phân tích kết quả</small></div>
+    </div>
+    <div class="badge bg-a" style="margin-top:6px;">→ Phase 3: Trigger từ hành vi học (ClassIn) — vắng 3 ngày, điểm thấp, xong khóa</div>
+  </div>
+</div>
+
+<div class="between"><span class="ar-d">↓</span></div>
+
+<!-- ⑦ UPSELL / CROSS-SELL -->
+<div class="section sbg-k">
+  <div class="sec-head sbg-k">
+    <span class="sec-num" style="color:var(--k-tx)">⑦</span>
+    <span class="sec-title">Upsell / Cross-sell / Referral</span>
+  </div>
+  <div class="sec-body">
+    <div class="badge bg-now" style="margin-bottom:8px;">⚡ Luồng đang làm hiện tại</div>
+    <div class="row" style="gap:8px;align-items:flex-start;margin-bottom:6px;">
+      <div class="node nm manual" style="flex:1;"><b>✋ Sale gợi ý khi gặp dịp</b><small>Không hệ thống, phụ thuộc sale</small></div>
+      <div class="node nnow now" style="flex:1;"><b>⚡ Chương trình Đại sứ</b><small>Học sinh cũ giới thiệu — hoa hồng thủ công</small></div>
+      <div class="node nm manual" style="flex:1;"><b>✋ Chưa có retarget tự động</b><small>Lead cũ không được khai thác lại</small></div>
+    </div>
+
+    <hr class="sep">
+    <div class="badge bg-a">→ Phase 2: Broadcast Zalo OA ưu đãi theo danh sách — học sinh sắp thi, xong khóa</div>
+    <div class="row" style="gap:8px;margin-top:6px;align-items:flex-start;">
+      <div class="node nk next" style="flex:1;"><b>→ Zalo OA broadcast ưu đãi</b><small>Theo nhóm: sắp thi, xong khóa</small></div>
+      <div class="node nk next" style="flex:1;"><b>→ Cross-sell tự động</b><small>BCA→QDA, HSA→V-ACT</small></div>
+      <div class="node ng next" style="flex:1;"><b>→ Đại sứ: tính hoa hồng tự động</b><small>Qua Google Sheet + webhook</small></div>
+    </div>
+    <div class="badge bg-a" style="margin-top:6px;">→ Phase 3: Retarget Ads Meta từ custom audience CRM — kích hoạt lại cold lead</div>
+    <div class="badge bg-k" style="margin-top:4px;">↻ Đăng ký khóa mới → quay lại tầng Thanh toán ③</div>
+  </div>
+</div>
+
+<!-- ─── So sánh 3 giai đoạn ─── -->
+<div class="compare">
+  <div class="compare-hd">Lộ trình triển khai theo 3 phase</div>
+  <div class="compare-grid">
+    <div class="cc c1">
+      <h3 style="color:#7A5800;">⚡ Hiện tại – Giữ nguyên</h3>
+      <ul>
+        <li>✓ Chạy Ads + Landing page</li>
+        <li>✓ Sale gọi + chốt qua Zalo</li>
+        <li>✓ Thanh toán qua web</li>
+        <li>✓ Nhóm Zalo lớp + Zoom</li>
+        <li>✓ QLL hỗ trợ onboard trong Zalo</li>
+        <li>✓ Đại sứ giới thiệu</li>
+        <li>✗ Nhiều bước thủ công, lặp lại</li>
+      </ul>
+    </div>
+    <div class="cc c2">
+      <h3 style="color:var(--b-tx);">🤖 Phase 1–2 – Tháng 1–2</h3>
+      <ul>
+        <li>✅ SePay webhook – đã xong</li>
+        <li>→ Email + Zalo OA onboard tự động</li>
+        <li>→ QLL duyệt 1 click dashboard</li>
+        <li>→ Form lead tự đẩy vào CRM</li>
+        <li>→ Zalo OA nurture Warm/Cold</li>
+        <li>→ Chuyển Zoom → ClassIn</li>
+        <li>→ Broadcast ưu đãi theo list</li>
+      </ul>
+    </div>
+    <div class="cc c3">
+      <h3 style="color:var(--g-tx);">🚀 Phase 3 – Tháng 3+</h3>
+      <ul>
+        <li>→ ClassIn data → Dashboard realtime</li>
+        <li>→ Trigger vắng học, điểm thấp</li>
+        <li>→ Chatbot 24/7 Zalo OA + web</li>
+        <li>→ NPS tự động định kỳ</li>
+        <li>→ Retarget Ads từ CRM</li>
+        <li>→ Cross-sell / upsell tự động</li>
+        <li>→ Hoa hồng Đại sứ tự tính</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="footer" style="margin-top:20px;">HSA Education &nbsp;·&nbsp; Quy trình vận hành nội bộ &nbsp;·&nbsp; Cập nhật thực tế tháng 5/2026</div>
+</div>
+
+
+</body></html>
