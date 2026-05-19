@@ -42,10 +42,10 @@
 | Học sinh nhập học mới/ngày | ~55 | Bình quân năm (HN ~33–34 + HCM ~21–22) |
 | Sản phẩm | 4 kỳ thi | HSA · BCA · BQP · ĐGNL HCM |
 | Cơ sở / thị trường vận hành | 2 | HN là thị trường lõi; HCM là thị trường mở rộng từ 2026 |
-| Nhân sự fulltime (offline) | 60 | HN 50 · HCM 10 |
-| Giảng viên online | ~70 | Phục vụ cả 2 miền |
-| Cộng tác viên / freelance | ~170 | 130 CTV Sale + 25 trợ giảng + 7 QLL + 8 Đại sứ |
-| **Tổng nhân lực hoạt động** | **~300 người** | Fulltime + GV + CTV |
+| Nhân sự fulltime/offline | 62 | HN 50 · HCM 12 |
+| Giảng viên online / dạy chính | ~70 GV online; HCM có 15 GV dạy chính | GV online phục vụ 2 miền; nhóm GV chính HCM được ghi nhận riêng |
+| Cộng tác viên / freelance | >170 | HN ~100 CTV Sale; HCM có Sale 20–25 người và Marketing 20 người gồm cả fulltime/CTV; cần tách dữ liệu để tránh đếm trùng |
+| **Tổng nhân lực hoạt động** | **>300 người** | Tổng ước tính vì một số nhóm HCM đang pha trộn fulltime và CTV |
 | Lớp học/năm (ước tính) | ~600–700 | Chủ yếu HN, cộng dồn 4 kỳ thi |
 | Áp lực mở rộng thị trường HCM | 6 đợt khai giảng/năm | Trung bình ~1.300 HS/đợt, chịu áp lực cạnh tranh cao |
 
@@ -70,8 +70,8 @@ Dữ liệu học sinh nằm rải rác giữa: form web → Google Sheet → EZ
 | Tải onboarding/ngày | ~55 HS, mỗi ca ~15 phút thủ công | ~14 giờ nhân công/ngày chỉ cho onboarding |
 | Spike tải HCM (1 tuần khai giảng) | ~260 HS/ngày × 6 đợt/năm | Cùng quy trình thủ công, không có batch processing |
 | Đội kỹ thuật | 4 kỳ thi × 2 cơ sở × 8 hệ thống | 1 outsource developer (phần lớn workload) |
-| Hồ sơ CTV cần tính hoa hồng | ~130 CTV | Tracking qua Zalo + Sheet, đối soát cuối tháng bằng tay |
-| Hồ sơ GV cần tính thù lao | ~70 GV | Tổng hợp giờ dạy thủ công cuối tháng |
+| Hồ sơ Sale/CTV cần tính hoa hồng | ~132–137 người | Tracking qua Zalo + Sheet, đối soát cuối tháng bằng tay |
+| Hồ sơ GV cần tính thù lao | ~70 GV online + 15 GV chính HCM | Tổng hợp giờ dạy thủ công cuối tháng; cần đối chiếu tránh trùng giữa 2 nhóm |
 | Single point of failure được phát hiện | "Duyệt học sinh" — 1 người | Nghỉ phép → toàn bộ chuỗi onboarding tắc |
 
 ---
@@ -123,10 +123,20 @@ MIỀN BẮC (HÀ NỘI)
 └── Đội Sale Online:    1 quản lý + ~100 CTV
 
 MIỀN NAM (HỒ CHÍ MINH)
-└── 2 sale offline + 1 quản lý vận hành = 3 người + ~30 CTV
+└── Sale: 20–25 người
 
-TỔNG CTV SALE: ~130 người (100 HN + 30 HCM)
+TỔNG MẠNG LƯỚI SALE: HN ~112 người + HCM 20–25 người = ~132–137 người
 ```
+
+**Cơ cấu nhân sự HCM cập nhật:**
+
+| Nhóm | Quy mô | Ghi chú |
+|---|---:|---|
+| Offline | 12 người | Nhân sự làm việc trực tiếp tại cơ sở HCM |
+| Sale | 20–25 người | Cần tách rõ fulltime/CTV trong CRM và chính sách hoa hồng |
+| Marketing | 20 người | Bao gồm cả fulltime và CTV |
+| Vận hành lớp học | 10 người | Phụ trách vận hành lớp, hỗ trợ học viên, phối hợp GV |
+| Giáo viên dạy chính | 15 người | Nhóm GV chính cho thị trường HCM |
 
 #### 2.2.4 Học vụ & Quản lý lớp học
 
@@ -137,27 +147,29 @@ TỔNG CTV SALE: ~130 người (100 HN + 30 HCM)
 | Trợ giảng | CTV / môn | 2–3 | Q&A online theo môn học |
 | Quản lý lớp (QLL) | Lead | 1 | Quản lý vận hành toàn bộ lớp HN + HCM |
 | Quản lý lớp (QLL) | CTV | 7 | Chạy lớp hàng ngày |
+| Vận hành lớp học HCM | Team vận hành | 10 | Vận hành lớp HCM, hỗ trợ học viên, phối hợp GV |
 
-> **Quan sát đo lường:** 8 QLL (1 lead + 7 CTV) đang quản lý ~20.000 học sinh → **2.500 HS/người**. Tỷ lệ này chỉ duy trì được nhờ workaround thủ công và không có dữ liệu học tập tập trung để theo dõi.
+> **Quan sát đo lường:** Nếu tính riêng 8 QLL hiện hữu (1 lead + 7 CTV), tải vẫn ở mức ~20.000 học sinh → **2.500 HS/người**. Sau khi ghi nhận thêm đội vận hành lớp học HCM 10 người, tỷ lệ vận hành toàn hệ thống giảm về khoảng **~1.110 HS/người**, nhưng vẫn phụ thuộc workaround thủ công và chưa có dữ liệu học tập tập trung để theo dõi.
 
 #### 2.2.5 Giảng viên
 
 | | SL | Ghi chú |
 |---|---|---|
 | GV online (2 miền) | ~70 | Dạy remote, phục vụ cả HN và HCM |
+| GV dạy chính HCM | 15 | Nhóm GV chính cho thị trường HCM, cần đối chiếu có nằm trong ~70 GV online hay là nhóm bổ sung |
 | GV làm đề thi | Chưa xác định | Vận hành riêng biệt, không nằm trong scope báo cáo này |
 
 #### 2.2.6 Truyền thông — Tổ chức theo kỳ thi
 
-> Cấu hình hiện tại: mỗi kỳ thi 1 Lead + 2 Content + 1 Edit + 1 Design = **5 người/kỳ thi**
+> Cấu hình HN hiện tại: mỗi kỳ thi 1 Lead + 2 Content + 1 Edit + 1 Design = **5 người/kỳ thi**. Riêng HCM đang ghi nhận **20 người Marketing** gồm cả fulltime và CTV.
 
 | Kỳ thi | Cơ sở | Team |
 |---|---|---|
 | ĐGNL HSA | HN | 5 người |
 | ĐGNL Bộ Công An | HN | 5 người |
 | ĐGNL Bộ Quốc Phòng | HN | 5 người |
-| ĐGNL HCM | HCM | 5 người |
-| **Tổng** | | **20 người** |
+| ĐGNL HCM | HCM | 20 người (fulltime + CTV) |
+| **Tổng** | | **~35 người** |
 
 **Tuyến đi trường:** 2 người — phụ trách hoạt động tại trường THPT, hội thảo, tư vấn trực tiếp.
 
@@ -174,34 +186,51 @@ TỔNG CTV SALE: ~130 người (100 HN + 30 HCM)
 NHÂN SỰ FULLTIME / OFFLINE
 ─────────────────────────────────────────
 HÀ NỘI                        : 50 người
-HỒ CHÍ MINH                   : 10 người
-Tổng offline                   : 60 người
+HỒ CHÍ MINH                   : 12 người
+Tổng offline                   : 62 người
 
-NHÂN SỰ CTV / FREELANCE
+SALE
 ─────────────────────────────────────────
+Sale offline HN                :  12
 CTV Sale HN                    : ~100
-CTV Sale HCM                   :  ~30
+Sale HCM                       : 20–25
+Tổng mạng lưới Sale            : ~132–137
+
+MARKETING / TRUYỀN THÔNG
+─────────────────────────────────────────
+Marketing HN (3 kỳ thi)        :  15
+Marketing HCM                  :  20 (fulltime + CTV)
+Tổng Marketing                 : ~35
+
+VẬN HÀNH LỚP HỌC
+─────────────────────────────────────────
+QLL Lead + CTV hiện hữu        :   8
+Vận hành lớp học HCM           :  10
+Tổng vận hành lớp học          : ~18
+
+NHÂN SỰ CTV / FREELANCE KHÁC
+─────────────────────────────────────────
 CTV Trợ giảng (2–3/môn)        :  ~25
-CTV Vận hành lớp (QLL)         :    7
 Đại sứ                         :    8
-Tổng CTV                       : ~170
 
 GIÁO VIÊN ONLINE
 ─────────────────────────────────────────
 GV online (không tính GV đề)   :  ~70
+GV dạy chính HCM               :   15 (ghi nhận riêng)
 
-TỔNG TOÀN TỔ CHỨC              : ~300 người
+TỔNG TOÀN TỔ CHỨC              : >300 người (cần chuẩn hóa để tránh đếm trùng fulltime/CTV HCM)
 ```
 
 ### 2.4 Tỷ lệ phụ thuộc nhân sự — Đo lường
 
 | Chỉ số | Giá trị thực tế Q2/2026 |
 |---|---|
-| Tỷ lệ fulltime / tổng nhân lực | 60/300 = **20%** |
-| Tỷ lệ CTV + GV / tổng nhân lực | 240/300 = **80%** |
-| Tỷ lệ HS/QLL | 2.500/1 |
+| Tỷ lệ fulltime/offline / tổng nhân lực | 62/>300 = **~20%** |
+| Tỷ lệ CTV + GV / tổng nhân lực | Ước tính **~80%**, cần chuẩn hóa vì HCM có nhóm vừa fulltime vừa CTV |
+| Tỷ lệ HS/QLL hiện hữu | 20.000/8 = **2.500 HS/người** |
+| Tỷ lệ HS/vận hành lớp học sau khi tính HCM | 20.000/18 ≈ **1.110 HS/người** |
 | Tỷ lệ HS/Sale offline (HN) | ~12.000/12 ≈ **1.000/Sale** |
-| Tỷ lệ HS/Sale offline (HCM) | 8.000/2 = **4.000/Sale** |
+| Tỷ lệ HS/Sale (HCM) | 8.000/20–25 ≈ **320–400 HS/người** |
 | Tỷ lệ CTV/quản lý CTV (HN) | 100/1 = **100/1** |
 
 ---
@@ -296,7 +325,7 @@ Sale nhập lead vào EZSale CRM
 **(b) Người chịu trách nhiệm và công cụ:**
 - Marketing chạy quảng cáo trên 3 nền tảng.
 - Lead thu về landing page.
-- Sale (HN: 12 người, HCM: 3 người) chịu trách nhiệm chuyển lead từ web/Sheet sang EZSale.
+- Sale (HN: 12 sale offline + ~100 CTV; HCM: 20–25 người) chịu trách nhiệm chuyển lead từ web/Sheet sang EZSale.
 
 **(c) Quan sát đo lường:**
 - Không có integration tự động giữa form và EZSale → lead vào EZSale qua thao tác nhập tay.
@@ -552,7 +581,7 @@ Kế toán chi đối chiếu Sheet và xử lý thù lao
 **(b) Người chịu trách nhiệm và công cụ:**
 - QLL Lead: lập lịch dạy.
 - GV: nhận lịch qua Zalo, xác nhận, dạy.
-- Kế toán chi: xử lý thù lao 70 GV mỗi tháng.
+- Kế toán chi: xử lý thù lao ~70 GV online và 15 GV chính HCM mỗi tháng (cần đối chiếu tránh trùng hồ sơ).
 
 **(c) Quan sát đo lường:**
 
@@ -588,22 +617,22 @@ Quản lý CTV tổng hợp số HS theo từng CTV
 Tính hoa hồng thủ công → chuyển kế toán chi
        │
        ▼
-Kế toán chi xử lý 130 CTV
+Kế toán chi xử lý mạng lưới Sale/CTV ~132–137 người
 ```
 
 **(b) Người chịu trách nhiệm và công cụ:**
-- 1 quản lý CTV HN + 1 quản lý vận hành HCM.
+- 1 quản lý CTV HN + đội Sale HCM 20–25 người + vận hành/kế toán chi phối hợp đối soát.
 - Công cụ: Zalo nhóm CTV + Google Sheet (chính).
 
 **(c) Quan sát đo lường:**
 
 | Chỉ số | Giá trị quan sát |
 |---|---|
-| Số CTV cần đối soát hoa hồng/tháng | ~130 |
-| Thời gian xử lý hoa hồng CTV/tháng (tổng) | Khoảng 2 ngày làm việc |
+| Số Sale/CTV cần đối soát hoa hồng/tháng | ~132–137 |
+| Thời gian xử lý hoa hồng Sale/CTV/tháng (tổng) | Khoảng 2 ngày làm việc |
 | Tỷ lệ tranh chấp/khiếu nại về attribution | Có xảy ra nhưng không có số liệu thống kê |
 | Tracking attribution tự động | Không có (không có link riêng `?ref=CTV_CODE`) |
-| Phân loại Đại sứ vs CTV | 8 Đại sứ, ~130 CTV — có chính sách riêng nhưng cùng quy trình thủ công |
+| Phân loại Đại sứ vs Sale/CTV | 8 Đại sứ, mạng lưới Sale/CTV ~132–137 người — có chính sách riêng nhưng cùng quy trình thủ công |
 
 **(d) Nguyên nhân gốc:**
 - Không có hệ thống link tracking cá nhân hóa (UTM/ref code) cho CTV/Đại sứ.
@@ -687,7 +716,7 @@ Cuối tháng:
 | R1 | 1 outsource dev phục vụ cả HN + HCM + 4 kỳ thi + chuyển đổi ClassIn | Rất cao | Rất cao | **Khủng hoảng tiềm ẩn** | Đang xảy ra |
 | R2 | Dữ liệu trong Drive cá nhân — mất khi nhân sự nghỉ | Rất cao | Cao | **Nghiêm trọng** | Đang xảy ra |
 | R3 | "Duyệt học sinh" 1 người — tắc nếu nghỉ | Cao | Cao | **Nghiêm trọng** | Đang xảy ra |
-| R4 | CTV tracking thủ công — 130 CTV → tranh chấp hoa hồng | Cao | Cao | **Cao** | Đang xảy ra |
+| R4 | Sale/CTV tracking thủ công — mạng lưới ~132–137 người → tranh chấp hoa hồng | Cao | Cao | **Cao** | Đang xảy ra |
 | R5 | Mở rộng thị trường mới nhưng chưa có SOP/KPI/reporting thống nhất | Cao | Cao | **Cao** | Đang xảy ra |
 | R6 | Lãnh đạo không có dashboard theo thị trường/cơ sở | Cao | Cao | **Cao** | Đang xảy ra |
 | R7 | Spike khai giảng ở thị trường mới: ~1.300 HS/đợt, làm thủ công | Rất cao | Cao | **Cao** | Sắp xảy ra mỗi đợt khai giảng |
@@ -760,7 +789,7 @@ Cuối tháng:
 | SLA cho onboarding HS sau thanh toán | Không có |
 | SLA cho phản hồi câu hỏi học viên | Không có |
 | Quy trình leo thang sự cố | Không có |
-| Quy trình audit hoa hồng CTV | Không có (chỉ tính tay cuối tháng) |
+| Quy trình audit hoa hồng Sale/CTV | Không có (chỉ tính tay cuối tháng) |
 | Quy trình quản lý đổi GV trong khóa | Không có chính thức |
 | Quy trình hoàn tiền | Có nhưng không thành SOP |
 
@@ -789,7 +818,7 @@ Cuối tháng:
 | Backup cho QLL Lead | Không có |
 | Backup cho 1 outsource dev | Không có |
 | Đào tạo nhân sự mới về SOP | Không có vì SOP chưa có |
-| Đánh giá hiệu suất CTV (130 người) | Không có cơ chế chính thức |
+| Đánh giá hiệu suất Sale/CTV (~132–137 người) | Không có cơ chế chính thức |
 | Coaching chất lượng tư vấn Sale/CTV | Phụ thuộc quản lý trực tiếp, chưa có nhịp review/chỉ số/chủ đề đào tạo rõ ràng |
 
 ---
@@ -828,7 +857,7 @@ Luồng 4 (Onboarding) phụ thuộc → Luồng 3 (SePay webhook)
 Luồng 5 (Học tập)     phụ thuộc → Luồng 4 (HS đã onboard xong)
 Luồng 6 (Chăm sóc)    phụ thuộc → Luồng 5 (data học tập ClassIn — *chưa sync tự động*)
 Luồng 7 (Thù lao GV)  phụ thuộc → Luồng 5 (giờ dạy ClassIn/Zoom chuyển tiếp — *tính thủ công*)
-Luồng 8 (Hoa hồng CTV) phụ thuộc → Luồng 1 (attribution — *thiếu link tracking*)
+Luồng 8 (Hoa hồng Sale/CTV) phụ thuộc → Luồng 1 (attribution — *thiếu link tracking*)
 Luồng 9 (Kế toán)     phụ thuộc → Luồng 3, 7, 8 (mọi nguồn doanh thu/chi phí)
 ```
 
@@ -856,15 +885,15 @@ Luồng 9 (Kế toán)     phụ thuộc → Luồng 3, 7, 8 (mọi nguồn doan
 |---|---|---|
 | Onboarding sau thanh toán | Thiết kế cho quy mô nhỏ — duy trì được bằng nhân công ~14h/ngày | ~55 HS/ngày |
 | Quản lý lớp học | Đang chuyển sang ClassIn nhưng chưa có dashboard vận hành/API sync — QLL vẫn phải check ClassIn/Zalo/Sheet thủ công | ~600–700 lớp/năm |
-| Quản lý 70 GV | Thù lao tính tay từ Sheet | 70 GV |
-| Quản lý 130 CTV | Tracking + commission tay | 130 CTV |
+| Quản lý GV online/GV chính HCM | Thù lao tính tay từ Sheet | ~70 GV online + 15 GV chính HCM |
+| Quản lý mạng lưới Sale/CTV | Tracking + commission tay | ~132–137 người |
 | Khai giảng HCM (spike) | Cùng quy trình thủ công, không có batch | 1.300 HS/đợt × 6 đợt/năm |
 
 ### 9.3 Đánh giá tóm lược
 
 HSA Education hiện đang vận hành ở quy mô ~20.000 học sinh/năm trên một nền tảng kỹ thuật chỉ có **một điểm tự động hoạt động ổn định (thanh toán)**. ClassIn đang được đưa vào để thay dần Zoom ở lớp học live, nhưng chưa được tích hợp API/data sâu vào hệ thống quản trị. Toàn bộ chuỗi giá trị còn lại — từ thu lead, nurture, onboarding, quản lý lớp học, chăm sóc, đến tính thù lao và hoa hồng — vẫn được "bù" bằng nhân công thủ công.
 
-Cơ cấu nhân sự (60 fulltime + 70 GV + 170 CTV) đang chịu tải tương đương quy mô tổ chức ~300 người *nhưng phần lớn workload là việc lặp lại có thể tự động hóa được về nguyên tắc*. Tỷ lệ 2.500 HS/QLL và 100 CTV/quản lý CTV chỉ duy trì được vì hệ thống chưa thực sự thực thi mức quản lý tương xứng.
+Cơ cấu nhân sự hiện đã vượt mốc 300 người khi tính 62 fulltime/offline, ~70 GV online, 15 GV chính HCM và mạng lưới Sale/CTV/Marketing pha trộn fulltime-CTV. Phần lớn workload vẫn là việc lặp lại có thể tự động hóa được về nguyên tắc. Tỷ lệ 2.500 HS/QLL hiện hữu, ~1.110 HS/người nếu tính thêm đội vận hành lớp HCM, và ~132–137 người trong mạng lưới Sale/CTV chỉ duy trì được vì hệ thống chưa thực sự thực thi mức quản lý tương xứng.
 
 Hai thị trường/cơ sở hiện chia sẻ cùng hệ thống công cụ thủ công nhưng chưa có cơ chế đồng bộ chính thức bằng văn bản, chưa có dashboard chung, và chưa có SOP chuẩn cho phối hợp đa thị trường. Điều này đặc biệt đáng chú ý khi HSA mở rộng sang thị trường HCM, nơi áp lực cạnh tranh cao hơn và đã có đối thủ dẫn đầu.
 

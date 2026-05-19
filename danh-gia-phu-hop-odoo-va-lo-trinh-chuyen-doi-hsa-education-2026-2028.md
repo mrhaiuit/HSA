@@ -6,7 +6,7 @@
 **Loại tài liệu:** Phân tích đánh giá phù hợp Odoo, kiến trúc chuyển đổi và lộ trình triển khai chi tiết
 **Tài liệu đầu vào:** [phan-tich-hien-trang-van-hanh-hsa-education-q2-2026.md](phan-tich-hien-trang-van-hanh-hsa-education-q2-2026.md)
 **Phạm vi:** Chuyển các điểm nghẽn, rủi ro và nợ vận hành từ báo cáo hiện trạng thành target architecture, fit-gap Odoo, kế hoạch dữ liệu, tích hợp và rollout
-**Quy mô hệ thống:** ~20.000 học sinh/năm | 60 fulltime | ~70 GV | ~170 CTV/freelance | 4 kỳ thi | 2 cơ sở
+**Quy mô hệ thống:** ~20.000 học sinh/năm | 62 fulltime/offline | ~70 GV online + 15 GV chính HCM | >170 CTV/freelance | 4 kỳ thi | 2 cơ sở
 **Không thay thế:** ClassIn, SePay, Zalo OA — các hệ thống này cần tích hợp vào lõi quản trị
 **Nguồn Odoo cập nhật:** [Odoo Pricing](https://www.odoo.com/pricing) và [Odoo 19 Documentation](https://www.odoo.com/documentation/19.0/), kiểm tra ngày 18/05/2026
 **Người soạn:** Giám đốc vận hành (COO) / Product Owner
@@ -285,7 +285,7 @@ SePay Webhook → Odoo API endpoint:
 |---|---|
 | Đối soát SePay với đơn hàng: ~2h/ngày | Auto-match: ~5 phút review |
 | Tổng hợp thù lao GV từ nhiều Sheet: ~1 ngày/tháng | Payroll batch: ~30 phút review |
-| Tính hoa hồng 130 CTV: ~2 ngày/tháng | Auto-tính từ confirmed orders: ~1 giờ review |
+| Tính hoa hồng mạng lưới Sale/CTV ~132–137 người: ~2 ngày/tháng | Auto-tính từ confirmed orders: ~1 giờ review |
 | Báo cáo tài chính theo kỳ thi: không có | Dashboard realtime |
 
 **Lưu ý:** Cần cài module kế toán Việt Nam (Vietnamese Chart of Accounts + tax configuration). Các Odoo partner VN đều cung cấp module localization này.
@@ -300,9 +300,10 @@ SePay Webhook → Odoo API endpoint:
 
 | Loại | Odoo Record | Quản lý qua |
 |---|---|---|
-| 60 nhân sự fulltime | **Employee** (có hợp đồng) | Odoo HR + Payroll |
-| ~70 GV online (thỉnh giảng) | **Employee** hoặc **Vendor** | Odoo HR (nếu dài hạn) hoặc Purchase (nếu invoice) |
-| ~130 CTV Sale | **Vendor** (hóa đơn hoa hồng) | Odoo Purchase + custom Commission |
+| 62 nhân sự fulltime/offline | **Employee** (có hợp đồng) | Odoo HR + Payroll |
+| ~70 GV online + 15 GV chính HCM | **Employee** hoặc **Vendor** | Odoo HR (nếu dài hạn) hoặc Purchase (nếu invoice) |
+| Mạng lưới Sale/CTV ~132–137 người | **Vendor** hoặc **Employee** tùy loại hợp đồng | Odoo Purchase + custom Commission; cần tách fulltime/CTV HCM |
+| Marketing HCM 20 người | **Employee** hoặc **Vendor** | Odoo HR/Documents/Project; gồm cả fulltime và CTV |
 | 8 Đại sứ | **Vendor** hoặc **Contact** | Tương tự CTV |
 
 **Payroll cho GV — cấu hình đặc thù:**
@@ -614,7 +615,7 @@ Company: HSA Education
 | Kế toán trưởng | Full Accounting + Payroll; Read HR |
 | Kế toán thu/chi | Accounting (giới hạn) |
 | Sale Manager | Full CRM + Read Sales |
-| Sale (11 HN + 3 HCM) | CRM — chỉ xem lead của mình |
+| Sale HN/HCM (HN 11 sale + HCM 20–25 người) | CRM — chỉ xem lead của mình |
 | QLL Lead | Full Project + Read Sales + Helpdesk |
 | QLL CTV | Project — chỉ task được assign |
 | Trưởng phòng truyền thông | Documents + Email Marketing (kỳ thi của mình) |
@@ -655,8 +656,8 @@ Khi Sales Order confirmed: `student_sbd = sequence.next_by_code('hsa.sbd.' + exa
 | Nguồn dữ liệu | Khối lượng ước tính | Chất lượng | Độ khó migrate |
 |---|---|---|---|
 | Danh sách học sinh (Google Sheet) | ~20.000 records/năm | Trung bình (thiếu chuẩn) | ★★★ |
-| Hồ sơ GV (Zalo/Sheet) | ~70 GV | Thấp (rải rác) | ★★ |
-| Hồ sơ CTV (Sheet) | ~130 CTV | Trung bình | ★★ |
+| Hồ sơ GV (Zalo/Sheet) | ~70 GV online + 15 GV chính HCM | Thấp (rải rác) | ★★ |
+| Hồ sơ Sale/CTV (Sheet) | ~132–137 người | Trung bình | ★★ |
 | Lịch sử thanh toán (SePay) | Theo năm | Tốt (SePay API) | ★★ |
 | Lịch sử liên lạc (Zalo) | Không chuẩn hóa | Xấu | Không migrate — bỏ |
 | EZSale leads | Tùy thuộc EZSale export | Trung bình | ★★ |
@@ -756,9 +757,9 @@ Odoo timeline:         │          Giai đoạn A                    Giai đo�
 - KPI: 100% invoice trong Odoo, đối soát SePay tự động
 
 **Tuần 8–10: HR cơ bản**
-- Import hồ sơ 60 nhân sự vào Odoo HR
-- Import hồ sơ 70 GV (Employee hoặc Vendor)
-- Import hồ sơ 130 CTV (Vendor)
+- Import hồ sơ 62 nhân sự fulltime/offline vào Odoo HR
+- Import hồ sơ ~70 GV online + 15 GV chính HCM (Employee hoặc Vendor)
+- Import hồ sơ mạng lưới Sale/CTV ~132–137 người (Vendor/Employee theo loại hợp đồng)
 - Hợp đồng số hóa trong Odoo
 
 **Tuần 10–12: Documents + Email Marketing**
