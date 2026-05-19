@@ -1,15 +1,26 @@
-# Phân Tích Chuyển Đổi Sang Odoo
-## HSA Education — Lộ trình Hệ thống Quản trị Tập trung
+# HSA Education — Đánh Giá Phù Hợp Odoo & Lộ Trình Chuyển Đổi
+## Fit-Gap Analysis · Target Architecture · Implementation Roadmap 2026–2028
 
 ---
 
-**Loại tài liệu:** Phân tích kỹ thuật & chiến lược triển khai ERP
-**Phạm vi:** Chuyển đổi toàn bộ quy trình vận hành 7 luồng sang Odoo
-**Quy mô hệ thống:** 60 nhân sự | ~70 GV | ~130 CTV | 4 kỳ thi | 2 cơ sở
+**Loại tài liệu:** Phân tích đánh giá phù hợp Odoo, kiến trúc chuyển đổi và lộ trình triển khai chi tiết
+**Tài liệu đầu vào:** [phan-tich-hien-trang-van-hanh-hsa-education-q2-2026.md](phan-tich-hien-trang-van-hanh-hsa-education-q2-2026.md)
+**Phạm vi:** Chuyển các điểm nghẽn, rủi ro và nợ vận hành từ báo cáo hiện trạng thành target architecture, fit-gap Odoo, kế hoạch dữ liệu, tích hợp và rollout
+**Quy mô hệ thống:** ~20.000 học sinh/năm | 60 fulltime | ~70 GV | ~170 CTV/freelance | 4 kỳ thi | 2 cơ sở
+**Không thay thế:** ClassIn, SePay, Zalo OA — các hệ thống này cần tích hợp vào lõi quản trị
+**Nguồn Odoo cập nhật:** [Odoo Pricing](https://www.odoo.com/pricing) và [Odoo 19 Documentation](https://www.odoo.com/documentation/19.0/), kiểm tra ngày 18/05/2026
 **Người soạn:** Giám đốc vận hành (COO) / Product Owner
-**Phiên bản:** 1.0 — Q2/2026
+**Phiên bản:** 1.1 — Q2/2026
 
 ---
+
+## 0. VAI TRÒ CỦA TÀI LIỆU NÀY
+
+Báo cáo hiện trạng đã xác định 5 nhóm vấn đề chính: dữ liệu phân mảnh, onboarding sau thanh toán thủ công, thiếu dữ liệu học tập có cấu trúc, phụ thuộc cá nhân, và không có dashboard vận hành theo thời gian thực. Tài liệu này không lặp lại phần mô tả hiện trạng; nhiệm vụ của nó là trả lời câu hỏi tiếp theo:
+
+> Odoo có phải lõi quản trị phù hợp để xử lý các điểm nghẽn đó không, nếu có thì triển khai theo thứ tự nào để không làm gián đoạn vận hành HSA?
+
+Kết luận điều hành: **Odoo phù hợp cao, nhưng là quyết định "go có điều kiện".** HSA nên triển khai Odoo khi đã có SOP tối thiểu, dữ liệu đầu vào được chuẩn hóa, Tech Ops/Odoo Champion nội bộ, và lịch rollout tránh các spike khai giảng.
 
 ## I. ĐÁNH GIÁ TỔNG QUAN — Odoo có phải lựa chọn đúng không?
 
@@ -26,7 +37,7 @@ ClassIn (học tập)    ←→  không sync        ←→  Kế toán thủ cô
 
 Kết quả: **dữ liệu phân mảnh, công việc trùng lặp, không có single source of truth.**
 
-Ở quy mô 30.000 học sinh/năm với 4 kỳ thi và 2 cơ sở, bài toán này sẽ chỉ tệ hơn, không tự cải thiện.
+Ở quy mô ~20.000 học sinh/năm với 4 kỳ thi và 2 cơ sở, bài toán này sẽ chỉ tệ hơn nếu không có một lõi quản trị tập trung. Tuy nhiên, lõi quản trị không có nghĩa là thay toàn bộ công cụ hiện hữu. Odoo chỉ nên giữ vai trò **system of record + workflow engine + reporting layer**.
 
 ### 1.2 Tại sao Odoo?
 
@@ -41,9 +52,23 @@ Kết quả: **dữ liệu phân mảnh, công việc trùng lặp, không có s
 | Scale lên 2028 | ✅ Tốt | Tốt | Hạn chế | Tốt |
 | Open source / tự host | ✅ Community | ❌ | Hạn chế | ✅ |
 
-**Kết luận:** Odoo là lựa chọn đúng cho quy mô và bài toán của HSA. Không phải vì Odoo hoàn hảo — mà vì không có lựa chọn nào tốt hơn ở mức giá và tính linh hoạt tương đương.
+**Kết luận:** Odoo là lựa chọn phù hợp cao cho quy mô và bài toán của HSA, nhưng không phải vì Odoo hoàn hảo. Odoo phù hợp vì nó gom được CRM, Sales, Accounting, HR, Project, Helpdesk, Documents và reporting vào cùng một database, trong khi vẫn cho phép tích hợp ClassIn, SePay và Zalo OA.
 
-### 1.3 Ba điều Odoo KHÔNG thay thế được — phải tích hợp
+### 1.3 Fit-gap cấp điều hành
+
+| Nhu cầu từ hiện trạng | Mức phù hợp Odoo | Nhận định |
+|---|---|---|
+| Single source of truth cho học sinh, đơn hàng, thanh toán | **Cao** | Odoo Contacts + Sales + Accounting là lõi phù hợp. |
+| CRM thay EZSale và chống rơi lead | **Cao** | Odoo CRM phù hợp để thay EZSale nếu form web được tích hợp tự động. |
+| Giám sát, hỗ trợ và QA tư vấn Sale/CTV | **Cao nhưng cần thiết kế quy trình** | Odoo CRM Activities/Tasks/Tags có thể tạo review queue, checklist QA và playbook case; cần cấu hình taxonomy và quyền quản lý rõ. |
+| Tự động hóa payment → SBD → onboarding | **Cao nhưng cần custom** | Cần SePay connector, sequence SBD và workflow Zalo/ClassIn. |
+| Dữ liệu học tập và trigger chăm sóc | **Trung bình-cao, phụ thuộc ClassIn** | Odoo không tạo data học tập; ClassIn là nguồn dữ liệu, Odoo xử lý workflow. |
+| Zalo OA/ZNS | **Thấp nếu dùng native, tốt nếu qua middleware** | Odoo Email/SMS không thay Zalo OA; cần n8n/Make hoặc custom connector. |
+| Tính thù lao GV và hoa hồng CTV | **Trung bình-cao** | Native Accounting/Payroll hỗ trợ nền tảng; logic đặc thù cần custom. |
+| Quản trị HN-HCM và phân quyền | **Cao** | Single company + branches/tags phù hợp hơn multi-company giai đoạn đầu. |
+| Triển khai nhanh toàn tổ chức | **Thấp** | Không nên big-bang. Cần rollout theo module và readiness gate. |
+
+### 1.4 Ba điều Odoo KHÔNG thay thế được — phải tích hợp
 
 > Đây là điểm quan trọng nhất cần hiểu trước khi bắt đầu.
 
@@ -57,11 +82,14 @@ Kết quả: **dữ liệu phân mảnh, công việc trùng lặp, không có s
 
 ## II. BẢN ĐỒ CHUYỂN ĐỔI — Quy trình hiện tại → Odoo
 
+Báo cáo hiện trạng mô tả 9 luồng nghiệp vụ đang vận hành. Trong kiến trúc mục tiêu, 9 luồng này được gom lại thành 7 value streams để giảm trùng lặp và làm rõ ownership: acquisition, nurture/close, payment/onboarding, learning data, student care, instructor operations, và collaborator/commission.
+
 ### 2.1 Mapping tổng thể
 
-| Công cụ/Quy trình hiện tại | Module Odoo tương ứng | Mức độ phù hợp | Cần tùy chỉnh |
+| Công cụ/Quy trình hiện tại | Module Odoo tương ứng | Mức độ phù hợp | Cần tùy chỉnh / tích hợp |
 |---|---|---|---|
 | EZSale CRM | **Odoo CRM** | ★★★★★ | Ít |
+| Review tư vấn Sale/CTV thủ công trên CRM | **Odoo CRM Activities + Knowledge/Helpdesk** | ★★★★☆ | Cấu hình QA checklist, case taxonomy, review queue |
 | Google Sheet (học sinh) | **Odoo Contacts + Sales** | ★★★★☆ | Thêm custom fields |
 | Google Sheet (GV giờ dạy) | **Odoo HR + Timesheets** | ★★★★☆ | Kết nối ClassIn data |
 | Google Sheet (CTV hoa hồng) | **Odoo Accounting + custom** | ★★★☆☆ | Module hoa hồng riêng |
@@ -75,6 +103,8 @@ Kết quả: **dữ liệu phân mảnh, công việc trùng lặp, không có s
 | Lịch dạy GV | **Odoo Project + Calendar** | ★★★☆☆ | Kết nối ClassIn |
 | ClassIn (học tập) | Không thay thế — tích hợp | Tích hợp | ClassIn connector |
 
+**Điểm cần chốt:** Nếu HSA cần custom module và API hai chiều với ClassIn/SePay/Zalo, phương án đánh giá chính phải là **Odoo Custom/Enterprise trên Odoo.sh hoặc on-premise**, không phải gói Standard thuần Odoo Online.
+
 ### 2.2 Luồng vận hành → Module Odoo
 
 ```
@@ -85,7 +115,8 @@ Form web → Odoo CRM (Lead) → Sales Team theo kỳ thi
 LUỒNG 2: Nurture & Close
 Odoo CRM Pipeline → Odoo Email Marketing (sequence theo kỳ thi)
 → Zalo OA qua Middleware
-                [Hiện tại: EZSale + Zalo thủ công]
+→ CRM QA Queue: case khó / tư vấn sai / cần coaching → quản lý review
+                [Hiện tại: EZSale + Zalo thủ công; review tư vấn làm tay từng case]
 
 LUỒNG 3: Payment → Onboarding
 SePay webhook → Odoo Accounting (Invoice paid)
@@ -97,7 +128,7 @@ LUỒNG 4: Học tập (ClassIn)
 ClassIn Data Subscription → Custom Connector → Odoo
 → Odoo stores: attendance, scores, login activity
 → Odoo Dashboard: 3 views (QLL / Ban ĐH / GV)
-                [Hiện tại: chưa có ClassIn]
+                [Hiện tại: ClassIn đang thay Zoom, nhưng chưa tích hợp API/data sâu]
 
 LUỒNG 5: Chăm sóc học viên
 Odoo Automation (từ ClassIn data) → Trigger Email/Zalo OA
@@ -142,17 +173,33 @@ Tags bắt buộc trên Lead:
 ├── Kỳ thi: [HSA | BCA | BQP | HCM]
 ├── Cơ sở: [HN | HCM]
 ├── Nguồn: [Organic | CTV | Tuyến đi trường | Đại sứ]
-└── CTV_code: [ref code nếu có]
+├── CTV_code: [ref code nếu có]
+├── Case tư vấn: [Học phí | Chọn khóa | Lịch học | So sánh đối thủ | Hoàn tiền | Phụ huynh phản đối | Khác]
+└── QA_status: [Chưa review | Cần quản lý hỗ trợ | Đã review | Đưa vào playbook]
 ```
 
 **Automation trong Odoo CRM:**
 - Khi lead mới vào → tự assign vào đúng Sales Team theo kỳ thi + cơ sở
 - Khi chuyển stage → trigger Email Marketing sequence
 - Khi ở "Đã liên hệ" > 48h không hoạt động → cảnh báo Sale phụ trách
+- Khi lead được tag "Cần quản lý hỗ trợ" → tạo Activity cho Sale Manager/CTV Manager review
+- Khi case tư vấn lặp lại nhiều lần → tạo task cập nhật playbook / FAQ nội bộ
 - Khi "Chốt đơn" → tự tạo Sales Order → trigger invoice
+
+**QA tư vấn & coaching Sale/CTV:**
+
+| Thành phần | Thiết kế trong Odoo |
+|---|---|
+| Review queue | CRM filter: lead/case có `QA_status = Cần quản lý hỗ trợ` hoặc lead giá trị cao chưa có next activity |
+| Checklist QA | Trường bắt buộc: nhu cầu HS, kỳ thi, học lực, phản đối chính, hướng xử lý, kết quả tư vấn |
+| Case taxonomy | Tag chuẩn cho các tình huống lặp lại: học phí, lịch học, chọn khóa, phụ huynh phản đối, so sánh đối thủ, hoàn tiền |
+| Coaching note | Manager ghi feedback ngay trên lead/activity, có owner và deadline follow-up |
+| Playbook | Odoo Knowledge/Documents lưu hướng dẫn xử lý case; link playbook gắn lại vào lead/case tương ứng |
+| Dashboard | Số case cần review, số case đã review, lỗi tư vấn lặp lại theo Sale/CTV, thời gian manager phản hồi |
 
 **Tùy chỉnh cần thiết:**
 - Thêm custom field `exam_type` và `ref_code` vào Lead form
+- Thêm custom fields `case_type`, `qa_status`, `manager_review_note`, `playbook_link`
 - Webhook nhận lead từ web portal HSA
 - Tích hợp form `hsavnu.edu.vn` → Odoo API
 
@@ -383,7 +430,7 @@ Danh sách:
 
 Odoo Documents là document management system với phân quyền theo folder, workflow approve, và tích hợp với các module khác (ký hợp đồng GV từ Odoo HR, lưu tài liệu học từ ClassIn).
 
-**Lưu ý quan trọng:** Không nên migrate khỏi Google Workspace đang được triển khai (Phase 0). Thay vào đó:
+**Lưu ý quan trọng:** Không nên migrate toàn bộ khỏi Google Workspace nếu Workspace vẫn là lớp cộng tác tài liệu hằng ngày. Thay vào đó:
 - **Google Drive**: vẫn dùng cho collaboration nội bộ (editing real-time, Google Docs/Sheets)
 - **Odoo Documents**: quản lý hợp đồng, SOP, tài liệu cần workflow approve, file gắn vào record (hồ sơ GV, hợp đồng CTV)
 - **Tích hợp**: Google Drive connector của Odoo (Community/Enterprise đều có)
@@ -520,6 +567,21 @@ Mỗi lần trigger Zalo OA → ghi vào Odoo:
 
 ---
 
+### 4.4 Lưu ý cập nhật Odoo 19 về API, webhook và hosting
+
+Các tích hợp ClassIn, SePay và Zalo khiến lựa chọn gói/hosting trở thành quyết định kiến trúc, không chỉ là quyết định chi phí.
+
+| Điểm cập nhật từ Odoo chính thức | Tác động với HSA |
+|---|---|
+| External API chỉ khả dụng trên gói **Custom**, không phải Standard. | HSA không nên lập ngân sách theo Standard nếu muốn tích hợp hai chiều với ClassIn/SePay/Zalo hoặc dùng custom module. |
+| Odoo 19 có External JSON-2 API; XML-RPC/JSON-RPC cũ được Odoo thông báo sẽ bị loại bỏ ở các phiên bản tương lai. | Connector mới nên thiết kế theo API mới/đường nâng cấp rõ, tránh viết mới dựa hoàn toàn vào RPC cũ. |
+| Odoo Studio hỗ trợ webhooks/automated actions, nhưng tài liệu Odoo khuyến nghị test trên database duplicate trước khi dùng live. | SePay webhook, Zalo trigger và automation onboarding phải có sandbox/staging, logging và rollback plan. |
+| Odoo.sh hosting không nằm trong giá subscription tiêu chuẩn. | Nếu triển khai custom module production trên Odoo.sh, cần tách chi phí Odoo subscription và Odoo.sh/hosting. |
+
+**Kết luận kiến trúc:** Giai đoạn đầu có thể dùng Odoo Online Custom cho sandbox và cấu hình business process. Khi đưa custom connector ClassIn/SePay/Zalo vào production, cần đánh giá nghiêm túc Odoo.sh hoặc on-premise Enterprise để kiểm soát module, môi trường staging và release.
+
+---
+
 ## V. THIẾT LẬP ODOO CHO 4 KỲ THI + 2 CƠ SỞ
 
 ### 5.1 Cấu trúc công ty và chi nhánh
@@ -592,7 +654,7 @@ Khi Sales Order confirmed: `student_sbd = sequence.next_by_code('hsa.sbd.' + exa
 
 | Nguồn dữ liệu | Khối lượng ước tính | Chất lượng | Độ khó migrate |
 |---|---|---|---|
-| Danh sách học sinh (Google Sheet) | ~30.000 records/năm | Trung bình (thiếu chuẩn) | ★★★ |
+| Danh sách học sinh (Google Sheet) | ~20.000 records/năm | Trung bình (thiếu chuẩn) | ★★★ |
 | Hồ sơ GV (Zalo/Sheet) | ~70 GV | Thấp (rải rác) | ★★ |
 | Hồ sơ CTV (Sheet) | ~130 CTV | Trung bình | ★★ |
 | Lịch sử thanh toán (SePay) | Theo năm | Tốt (SePay API) | ★★ |
@@ -647,12 +709,12 @@ Bước 4 — Import vào Odoo:
 > **Nguyên tắc quan trọng nhất:** Không triển khai Odoo TRƯỚC khi quy trình được chuẩn hóa (SOP đã viết, ClassIn đã ổn định, dữ liệu đã sạch). Odoo không giải quyết quy trình xấu — nó phóng đại vấn đề lên.
 
 ```
-Ops Roadmap:   Phase 0      Phase 1          Phase 2              Phase 3
-               (Q2/2026)    (Q3/2026)        (Q4/2026-Q1/2027)    (Q2-Q4/2027)
-                  │            │                    │                    │
-Odoo Timeline:    │      Giai đoạn A          Giai đoạn B         Giai đoạn C    Giai đoạn D
-                  │      (Planning)           (Foundation)        (Tích hợp)     (Tối ưu)
-                  │      Q3/2026              Q4/2026-Q1/2027     Q2-Q3/2027     Q4/2027+
+Readiness track:  Baseline/SOP     Automation + ClassIn stabilization/API design    Data cleanup/SOP stable    Operating maturity
+                  (Q2/2026)        (Q3/2026)                     (Q4/2026-Q1/2027)          (Q2-Q4/2027)
+                       │                    │                              │                         │
+Odoo timeline:         │          Giai đoạn A                    Giai đoạn B              Giai đoạn C     Giai đoạn D
+                       │          (Planning)                     (Foundation)             (Tích hợp)      (Tối ưu)
+                       │          Q3/2026                        Q4/2026-Q1/2027          Q2-Q3/2027      Q4/2027+
 ```
 
 ---
@@ -662,9 +724,10 @@ Odoo Timeline:    │      Giai đoạn A          Giai đoạn B         Giai �
 **Không động đến production, chỉ chuẩn bị.**
 
 - [ ] Chọn Odoo partner: vetting 3 nhà cung cấp, xem demo, ký hợp đồng
-- [ ] Chọn phiên bản: Enterprise SaaS (khuyến nghị cho giai đoạn đầu) hoặc self-hosted Community
+- [ ] Chọn phiên bản/hosting: Odoo Custom/Enterprise; sandbox có thể dùng Odoo Online Custom, production custom module nên đánh giá Odoo.sh hoặc on-premise
 - [ ] Setup Odoo sandbox: cấu hình thử nghiệm, không dữ liệu thật
 - [ ] Define exact configuration: products, teams, pipelines, user roles (dựa trên SOP đã viết)
+- [ ] Chốt integration approach: ưu tiên JSON-2 API / webhook có logging; không thiết kế mới phụ thuộc hoàn toàn vào RPC cũ
 - [ ] Chuẩn bị data migration: bắt đầu chuẩn hóa dữ liệu học sinh, GV, CTV
 - [ ] Phân công nội bộ: 1 người HSA là "Odoo Champion" (thường là Tech Ops)
 
@@ -681,7 +744,9 @@ Odoo Timeline:    │      Giai đoạn A          Giai đoạn B         Giai �
 - Sales Teams theo 4 kỳ thi
 - Web portal form → Odoo webhook (tự động tạo lead)
 - CTV link tracking → Odoo CRM ref_code
+- CRM QA workflow: case taxonomy, review queue cho Sale/CTV, checklist tư vấn, playbook link
 - KPI: 100% lead mới vào Odoo, không vào EZSale nữa
+- KPI: 100% case cần quản lý hỗ trợ có owner, deadline và kết quả review trên CRM
 
 **Tuần 4–8: Accounting + SePay**
 - Cài Localization VN (chart of accounts, thuế)
@@ -751,57 +816,70 @@ Odoo Timeline:    │      Giai đoạn A          Giai đoạn B         Giai �
 
 ## IX. CHI PHÍ ƯỚC TÍNH
 
+> Số dưới đây là ước tính để lập ngân sách, chưa phải báo giá mua hàng. Giá Odoo cần xác nhận lại tại thời điểm ký hợp đồng, theo số user trả phí, tỷ giá USD/VND, thuế, chi phí Odoo.sh/on-premise và scope custom module. Theo trang pricing chính thức Odoo kiểm tra ngày 18/05/2026, gói **Custom** là base case phù hợp hơn Standard vì HSA cần External API/custom integration.
+
 ### 9.1 Chi phí vận hành (recurring)
 
-**Option 1 — Odoo Enterprise SaaS (khuyến nghị cho giai đoạn đầu):**
+**Base case khuyến nghị — Odoo Custom/Enterprise + Odoo.sh hoặc hosting kiểm soát được custom module:**
 
-| Hạng mục | Số lượng | Đơn giá | Chi phí/năm |
-|---|---|---|---|
-| Odoo Enterprise users | ~30 power users | ~$25–31/user/tháng | ~220–280 triệu VND |
-| n8n cloud (Zalo middleware) | 1 instance | ~$50/tháng | ~15 triệu VND |
-| Server hosting (nếu self-host ClassIn connector) | 1 VPS | ~500k/tháng | ~6 triệu VND |
-| **Tổng recurring/năm** | | | **~240–300 triệu VND** |
+| Hạng mục | Cơ sở tính | Ước tính/năm |
+|---|---|---|
+| Odoo Custom subscription | ~30 paid backend users × khoảng US$25.50/user/tháng nếu trả năm | ~US$9.180/năm, tương đương ~230–245 triệu VND trước VAT/tỷ giá thực tế |
+| Odoo.sh / hosting production + staging | Phụ thuộc worker, storage, môi trường staging | ~20–80 triệu VND |
+| n8n hoặc middleware Zalo OA | Cloud hoặc self-hosted | ~10–40 triệu VND |
+| Monitoring, backup ngoài, domain/email kỹ thuật | Tùy chính sách IT | ~5–20 triệu VND |
+| Bảo trì custom code / partner support | Retainer sau go-live, bugfix, minor change request | ~60–180 triệu VND |
+| **Tổng recurring tham chiếu** | | **~325–565 triệu VND/năm** |
 
-**Option 2 — Self-hosted Community + paid apps:**
-- Server: 3–5 triệu/tháng (decent VPS)
-- Community apps: không phải app nào cũng free
-- Cần internal sysadmin hoặc thuê ngoài maintain
-- Chi phí khó ước tính hơn; phù hợp hơn khi có Head of Technology
+**Không nên dùng làm base case:** Odoo Standard có chi phí user thấp hơn nhưng không phù hợp nếu HSA cần External API/custom module cho ClassIn, SePay, Zalo OA hoặc commission logic.
+
+**Option thay thế — Community/self-hosted:** Có thể giảm subscription nhưng tăng rủi ro vận hành. Chỉ nên xem xét sau khi có Head of Technology/Tech Ops đủ năng lực quản trị server, bảo mật, backup, upgrade và custom code.
 
 ### 9.2 Chi phí triển khai (one-time)
 
 | Hạng mục | Chi phí ước tính |
 |---|---|
-| Odoo Partner: configuration + training | 80–150 triệu VND |
-| Custom module: ClassIn connector | 50–100 triệu VND |
-| Custom module: SePay connector | 10–20 triệu VND |
-| Custom module: CTV Commission | 15–30 triệu VND |
-| Middleware setup (n8n + Zalo OA) | 20–40 triệu VND |
-| Data migration + cleanup | 20–40 triệu VND |
-| Training toàn tổ chức | 10–20 triệu VND |
-| **Tổng one-time** | **205–400 triệu VND** |
+| Discovery + solution design + fit-gap workshop | 60–120 triệu VND |
+| Configuration core modules: CRM, Sales, Accounting, HR, Project/Helpdesk, Documents | 120–250 triệu VND |
+| Custom module: ClassIn connector | 80–160 triệu VND |
+| Custom module: SePay connector + payment reconciliation | 20–50 triệu VND |
+| Middleware setup: Odoo → n8n/Make → Zalo OA + logging | 30–80 triệu VND |
+| Custom logic: CTV commission + GV timesheet/payroll review | 40–100 triệu VND |
+| Data migration + cleanup + duplicate handling | 40–120 triệu VND |
+| Training + change management + SOP update | 30–80 triệu VND |
+| UAT, staging, go-live support, rollback plan | 40–100 triệu VND |
+| **Tổng one-time full scope** | **~460 triệu – 1,06 tỷ VND** |
+
+**MVP ngân sách thấp hơn:** Nếu chỉ làm CRM + Accounting + SePay basic + onboarding automation tối thiểu trong năm đầu, ngân sách one-time có thể nằm khoảng **250–450 triệu VND**, nhưng chưa nên kỳ vọng có đủ ClassIn dashboard, Zalo automation sâu, commission tự động và payroll/timesheet hoàn chỉnh.
 
 ### 9.3 Tổng chi phí Năm 1
 
 ```
-One-time implementation:  ~205–400 triệu
-Recurring Year 1:         ~240–300 triệu
-──────────────────────────────────────────
-Tổng Năm 1:               ~445–700 triệu VND
-Năm 2+ (chỉ recurring):   ~240–300 triệu/năm
+Kịch bản MVP:
+  One-time:        ~250–450 triệu
+  Recurring:       ~325–565 triệu/năm
+  Tổng năm 1:      ~575 triệu – 1,015 tỷ VND
+
+Kịch bản full transformation:
+  One-time:        ~460 triệu – 1,06 tỷ
+  Recurring:       ~325–565 triệu/năm
+  Tổng năm 1:      ~785 triệu – 1,625 tỷ VND
+
+Năm 2+:
+  Recurring + bảo trì + minor enhancements: ~325–650 triệu/năm
 ```
 
 ### 9.4 ROI ước tính
 
 | Tiết kiệm | Hiện tại | Sau Odoo | Tiết kiệm/năm |
 |---|---|---|---|
-| Nhân công onboarding thủ công | ~20h/ngày × 250 ngày × 150k/h | ~2h/ngày | ~630 triệu VND |
-| Kế toán đối soát + tổng hợp | ~3 ngày/tháng × 2 người | ~4h/tháng | ~50 triệu VND |
-| Tính hoa hồng CTV + thù lao GV | ~3 ngày/tháng | ~4h/tháng | ~40 triệu VND |
+| Nhân công onboarding thủ công | ~14h/ngày × 250 ngày × 150k/h = ~525 triệu | ~2–4h/ngày review ngoại lệ | ~375–450 triệu VND |
+| Kế toán đối soát + tổng hợp | ~2h/ngày đối soát SePay + báo cáo tháng | ~15–30 phút/ngày review | ~80–120 triệu VND |
+| Tính hoa hồng CTV + thù lao GV | ~3 ngày/tháng | ~0,5 ngày/tháng review batch | ~30–60 triệu VND |
 | Sự cố do thiếu hệ thống | Không đo được | Giảm đáng kể | — |
-| **Tổng tiết kiệm ước tính** | | | **~720 triệu/năm** |
+| **Tổng tiết kiệm định lượng sơ bộ** | | | **~485–630 triệu/năm** |
 
-> Payback period ước tính: **8–12 tháng** (dựa trên tiết kiệm nhân công, chưa tính giá trị từ data insight và tăng trưởng do quy trình tốt hơn).
+> Payback period ước tính: **12–24 tháng với MVP đúng trọng tâm**, và **18–30 tháng với full transformation**. Con số này chỉ đáng tin sau khi HSA đo baseline chính thức cho onboarding time, reconciliation time, ticket volume, lỗi dữ liệu và tỷ lệ chuyển đổi lead.
 
 ---
 
@@ -830,7 +908,7 @@ Dưới góc nhìn của các dự án ERP thất bại phổ biến, đây là 
 Nếu HĐQT không chỉ đạo toàn tổ chức dùng Odoo thì Odoo sẽ bị bypass như Myxteam. Không có "tự nguyện chuyển đổi" với hệ thống mới.
 
 **2. Process trước, system sau**
-Triển khai Odoo sau khi SOP đã viết xong (Phase 2 của Ops roadmap), không phải trước. Odoo configure theo SOP, không phải SOP chạy theo Odoo.
+Triển khai Odoo sau khi SOP tối thiểu đã viết xong và owner quy trình đã rõ, không phải trước. Odoo configure theo quy trình đã thống nhất, không dùng Odoo để ép tổ chức tự đoán lại quy trình trong lúc go-live.
 
 **3. Người chịu trách nhiệm nội bộ**
 Tech Ops (đang tuyển) phải trở thành Odoo Champion — người duy nhất có thể answer câu hỏi của nhân viên, raise bug với partner, và maintain cấu hình. Không có người này, dự án chết sau 3 tháng.
@@ -846,19 +924,19 @@ Không go-live tất cả module cùng lúc. Mỗi module go-live → đo KPI �
 ## XII. KHUYẾN NGHỊ CUỐI CÙNG
 
 ### Quyết định 1: Có nên dùng Odoo không?
-**Có.** Odoo là kiến trúc đúng cho HSA Education ở quy mô hiện tại và lộ trình 2028. Không có lựa chọn nào khác cân bằng tốt hơn giữa tính năng, chi phí, và khả năng tùy chỉnh.
+**Có điều kiện.** Odoo là kiến trúc phù hợp cao cho HSA Education ở quy mô hiện tại và lộ trình 2028, nhưng chỉ nên triển khai khi HSA coi đây là chương trình chuyển đổi vận hành, không phải dự án cài phần mềm. Điều kiện tối thiểu: SOP đủ rõ, dữ liệu đầu vào được chuẩn hóa, có Odoo Champion nội bộ, có partner đủ năng lực, và rollout tránh các đợt khai giảng cao điểm.
 
 ### Quyết định 2: Bắt đầu khi nào?
 **Không phải ngay bây giờ.** Thứ tự đúng:
 ```
-Q2/2026: Ops Phase 0 (Workspace, documentation)
-Q3/2026: Ops Phase 1 (Automation onboarding, ClassIn pilot)
+Q2/2026: Baseline hiện trạng, SOP tối thiểu, ownership dữ liệu, chuẩn hóa tài liệu
+Q3/2026: Automation onboarding hẹp, ổn định vận hành ClassIn + thiết kế API/data sync, data cleanup bắt đầu
          + ĐỒNG THỜI: Odoo Giai đoạn A (Planning, sandbox, chọn partner)
 Q4/2026: Odoo Giai đoạn B (CRM go-live, Accounting)
 Q2/2027: Odoo Giai đoạn C (ClassIn integration, Zalo middleware, dashboards)
 ```
 
-Lý do: Nếu bắt đầu Odoo đồng thời với Ops Phase 0, tổ chức sẽ gánh **4 thay đổi lớn cùng lúc**: Workspace mới + ClassIn mới + Automation mới + Odoo mới. Mỗi thay đổi đều cần adaptation time. Làm song song → không cái nào ổn.
+Lý do: Nếu bắt đầu Odoo trước khi baseline, SOP, data ownership và lớp vận hành/ClassIn API đủ rõ, tổ chức sẽ gánh quá nhiều thay đổi lớn cùng lúc: chuẩn hóa tài liệu, ClassIn, automation, data cleanup và ERP. Mỗi thay đổi đều cần adaptation time. Làm song song quá rộng sẽ làm giảm xác suất go-live thành công.
 
 ### Quyết định 3: Bắt đầu với module nào?
 **CRM trước tiên.** Lý do:
@@ -867,15 +945,28 @@ Lý do: Nếu bắt đầu Odoo đồng thời với Ops Phase 0, tổ chức s�
 - Là foundation cho tất cả module sau (mọi thứ bắt đầu từ CRM)
 
 ### Quyết định 4: Enterprise hay Community?
-**Enterprise SaaS trong Giai đoạn B-C.** Khi hệ thống đã ổn định (Giai đoạn D), xem xét self-hosted nếu cần giảm chi phí dài hạn.
+**Odoo Custom/Enterprise là base case.** Standard không phù hợp làm phương án chính vì HSA cần API/custom integration. Community/self-hosted chỉ nên xem xét khi đã có năng lực Tech Ops mạnh, vì chi phí subscription thấp hơn có thể bị bù lại bằng chi phí bảo trì, bảo mật, backup và upgrade.
 
-### Ba việc cần làm ngay:
-1. **Chọn Odoo partner** — Request demo và portfolio từ 3 nhà cung cấp tại VN (deadline: Q3/2026)
-2. **Assign Odoo Champion nội bộ** — Tech Ops khi tuyển được phải được đào tạo Odoo (Functional + Technical cơ bản)
-3. **Bắt đầu chuẩn hóa data học sinh** — Đây là task dài nhất và không ai làm thay được
+### Năm việc cần làm ngay:
+1. **Chốt owner nội bộ** — Tech Ops/Odoo Champion phải được phân công trước khi ký hợp đồng triển khai.
+2. **Đo baseline 30 ngày** — onboarding time, đối soát SePay, lỗi add lớp, lead response time, ticket/sự cố.
+3. **Chuẩn hóa data học sinh** — Đây là task dài nhất và không ai làm thay được.
+4. **Vetting 3 Odoo partner** — Yêu cầu demo theo đúng use case HSA: SePay, ClassIn, Zalo OA, 4 kỳ thi, 2 cơ sở.
+5. **Làm sandbox trước production** — Không go-live module nào nếu chưa qua UAT, rollback plan và training.
 
 ---
 
-*Phiên bản 1.0 — Q2/2026 — Phân tích ban đầu*
+## XIII. NGUỒN THAM KHẢO ODOO CHÍNH THỨC
+
+| Nguồn | Điểm dùng trong tài liệu |
+|---|---|
+| [Odoo Pricing](https://www.odoo.com/pricing) | Cập nhật gói Standard/Custom, External API, định nghĩa paid user, chi phí chưa bao gồm Odoo.sh/custom code |
+| [Odoo 19 — Webhooks](https://www.odoo.com/documentation/19.0/applications/studio/automated_actions/webhooks.html) | Cập nhật khả năng webhook/automated actions và yêu cầu test trước production |
+| [Odoo 19 — External RPC API](https://www.odoo.com/documentation/19.0/developer/reference/external_rpc_api.html) | Cập nhật điều kiện External API và cảnh báo deprecation RPC cũ |
+| [Odoo 19 — External JSON-2 API](https://www.odoo.com/documentation/19.0/developer/reference/external_api.html) | Định hướng connector mới cho tích hợp dài hạn |
+
+---
+
+*Phiên bản 1.1 — Q2/2026 — Fit-gap Odoo & transformation roadmap*
 *Review tiếp theo: Sau khi chọn được Odoo partner và xác nhận ngân sách*
 *Người chịu trách nhiệm: Giám đốc vận hành + Tech Ops (khi tuyển được)*
