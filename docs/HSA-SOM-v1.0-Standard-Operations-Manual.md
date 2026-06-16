@@ -63,7 +63,7 @@ HSA Education là chuỗi luyện thi đánh giá năng lực quốc gia hàng �
 
 Tại thời điểm Q2/2026, vận hành dựa trên **9 luồng thủ công** với mức độ tự động hóa thấp. Hệ thống duy nhất hoạt động tự động ổn định là **webhook thanh toán SePay**. Phân tích hiện trạng đã xác định **14 nút thắt (bottlenecks)** tiêu tốn **~504 giờ công/tháng (~63 ngày công/tháng)** chỉ riêng cho onboarding, đối soát, tính thù lao giảng viên và hoa hồng CTV; đồng thời tồn tại **13 rủi ro trọng yếu**, nổi bật là các điểm lỗi đơn (Single Point of Failure — SPOF): 1 lập trình viên outsource gánh toàn hệ thống, 1 người "duyệt học sinh" thủ công, và dữ liệu lưu trong Google Drive cá nhân.
 
-Tài liệu này thiết kế lại toàn bộ vận hành thành **7 Value Streams** chuẩn hóa, **11 SOP** thực thi được, một **khung SLA/KPI đo lường được**, và một **kiến trúc tự động hóa** lấy **Odoo làm system of record**, **n8n làm middleware**, tích hợp sâu **ClassIn (API V1/V2 + Data Subscription)** và **Zalo OA**. Mục tiêu trọng tâm: biến chuỗi onboarding từ **~15 phút/học sinh thủ công** thành **dưới 5 phút hoàn toàn tự động**, loại bỏ SPOF, và cung cấp **dashboard realtime** cho lãnh đạo theo trục kỳ thi × cơ sở.
+Tài liệu này thiết kế lại toàn bộ vận hành thành **7 Value Streams** chuẩn hóa, **11 SOP** thực thi được, một **khung SLA/KPI đo lường được**, và một **kiến trúc tự động hóa** lấy **Odoo làm system of record**, **.NET / Hangfire làm middleware**, tích hợp sâu **ClassIn (API V1/V2 + Data Subscription)** và **Zalo OA**. Mục tiêu trọng tâm: biến chuỗi onboarding từ **~15 phút/học sinh thủ công** thành **dưới 5 phút hoàn toàn tự động**, loại bỏ SPOF, và cung cấp **dashboard realtime** cho lãnh đạo theo trục kỳ thi × cơ sở.
 
 **Cam kết kết quả mục tiêu (đến hết 2027):**
 - Giảm tải nhân công bottleneck từ ~504h/tháng xuống **< 80h/tháng** (chỉ xử lý ngoại lệ).
@@ -78,7 +78,7 @@ Tài liệu này thiết kế lại toàn bộ vận hành thành **7 Value Stre
 - Toàn bộ quy trình vận hành end-to-end từ tạo lead → tư vấn → thanh toán → onboarding → học tập → chăm sóc → đối soát tài chính.
 - Cả 2 cơ sở (HN, HCM) và cả 4 sản phẩm thi.
 - Toàn bộ nhân sự fulltime, giảng viên online, và mạng lưới CTV/Đại sứ.
-- Các hệ thống: hsavnu.edu.vn, SePay, EZSale (chuyển dần sang Odoo), Google Workspace, Zalo OA, ClassIn, Zoom (legacy), Odoo, n8n.
+- Các hệ thống: hsavnu.edu.vn, SePay, EZSale (chuyển dần sang Odoo), Google Workspace, Zalo OA, ClassIn, Zoom (legacy), Odoo. .NET Integration Platform.
 
 **Ngoài phạm vi (Out-of-scope):**
 - Thiết kế nội dung học thuật/đề thi (thuộc Hội đồng Chuyên môn — tài liệu riêng).
@@ -130,7 +130,7 @@ TIER 1 — Standard Operations Manual (TÀI LIỆU NÀY)  ◄── governs ever
    ├── TIER 2 — SOPs chi tiết (11 SOP nhúng trong Phần IV)
    ├── TIER 2 — Khung SLA / KPI (Phần V, VIII)
    └── TIER 3 — Work Instructions & Templates (Phụ lục B–D, checklist tác nghiệp)
-TIER 4 — Technical Specs (ClassIn API spec, Odoo config, n8n workflow — Phần X + Phụ lục A)
+TIER 4 — Technical Specs (ClassIn API spec, Odoo config, Hangfire job — Phần X + Phụ lục A)
 ```
 
 **Quan hệ:** SOM định nghĩa "phải làm gì và ai chịu trách nhiệm". SOP định nghĩa "làm như thế nào theo từng bước". Work Instruction định nghĩa "thao tác cụ thể trên hệ thống". Khi có mâu thuẫn, tài liệu cấp cao hơn (số Tier nhỏ hơn) thắng.
@@ -274,7 +274,7 @@ TIER 4 — Technical Specs (ClassIn API spec, Odoo config, n8n workflow — Ph�
 
 ### RDC-12 — Tech Ops (CẦN TUYỂN — xem SPOF-01)
 - **Báo cáo cho:** Operations Director.
-- **Trách nhiệm:** Quản trị Odoo/n8n/ClassIn integration; vận hành automation; xử lý sự cố P0/P1 kỹ thuật; document toàn bộ technical stack; quản outsource dev.
+- **Trách nhiệm:** Quản trị Odoo/.NET/ClassIn integration; vận hành automation; xử lý sự cố P0/P1 kỹ thuật; document toàn bộ technical stack; quản outsource dev.
 - **KPI:** Uptime automation, MTTR sự cố kỹ thuật, % technical stack được document.
 
 ### RDC-13 — HCNS (Hành chính Nhân sự)
@@ -299,7 +299,7 @@ Nguyên tắc: **Least Privilege** — chỉ cấp quyền tối thiểu cần �
 | Zalo OA (gửi thông báo) | — | R | — | — | — | — | RW | RW | — | — | RW | Admin | — |
 | Google Workspace (Drive tổ chức) | RW | RW | RW | R(scoped) | — | RW | RW | R | R | RW | RW | Admin | RW |
 | Dữ liệu cá nhân HS (PII) | R(masked) | R | R(scoped) | R(own lead) | — | RW | R | R(own class) | R(own class, masked) | R(billing) | — | Admin | — |
-| n8n workflows | — | R | — | — | — | — | — | — | — | — | — | Admin | — |
+| Hangfire jobs | — | R | — | — | — | — | — | — | — | — | — | Admin | — |
 | Dashboard COO/QLL/GV | RW | RW | R | — | — | — | RW(QLL) | R(QLL) | R(GV) | R | R | Admin | — |
 
 > **Ghi chú:** RW = đọc+ghi; R = chỉ đọc; (own) = chỉ dữ liệu của mình; (masked) = PII bị che một phần; Admin = quản trị toàn quyền. CTV **không** được cấp tài khoản hệ thống nội bộ — chỉ làm việc qua ref link và cổng đối tác giới hạn.
@@ -363,14 +363,14 @@ Chuỗi giá trị HSA Education biến nhu cầu thị trường thành kết q
 
 **Actors:** [TT] Truyền thông, [Sale], [CTV], [TP-Sale], [TechOps] (vận hành automation).
 
-**Tools:** FB/TikTok/Google Ads → Landing page (hsavnu.edu.vn) → n8n webhook → Odoo CRM.
+**Tools:** FB/TikTok/Google Ads → Landing page (hsavnu.edu.vn) → .NET webhook handler → Odoo CRM.
 
 **Flow (BPMN text):**
 ```
 ((Ad click)) ==> [Landing page hsavnu.edu.vn]
    --> [HS điền form: tên, SĐT, email, kỳ thi, cơ sở]
    == ?ref=CTVxxx được capture vào hidden field ==>
-((Form submit)) ==> [n8n webhook nhận payload]
+((Form submit)) ==> [.NET webhook handler nhận payload]
    ==> [Odoo CRM: auto-create Lead]
        ==> auto-tag: exam_type, source_channel, cơ sở
        ==> nếu có ref_code: gắn tag CTV_code
@@ -397,7 +397,7 @@ Chuỗi giá trị HSA Education biến nhu cầu thị trường thành kết q
 
 **Actors:** [Sale], [CTV], [TP-Sale] (QA + escalation).
 
-**Tools:** Odoo CRM (pipeline + activity), chuỗi nurture tự động (Odoo Marketing/n8n → Zalo OA), Playbook tư vấn (Phụ lục C).
+**Tools:** Odoo CRM (pipeline + activity), chuỗi nurture tự động (Odoo Marketing/.NET → Zalo OA), Playbook tư vấn (Phụ lục C).
 
 **Flow (BPMN text):**
 ```
@@ -428,13 +428,13 @@ Chuỗi giá trị HSA Education biến nhu cầu thị trường thành kết q
 
 ## VS3 — Payment → Auto-Onboarding (CORE VALUE STREAM)
 
-**Mục tiêu:** Từ khoảnh khắc thanh toán thành công đến khi học sinh có SBD, được enroll ClassIn, nhận đầy đủ thông tin qua Zalo OA — **hoàn toàn tự động dưới 5 phút**. Đây là chuỗi cốt lõi loại bỏ bottleneck lớn nhất (Luồng 4 AS-IS ~14h/ngày).
+**Mục tiêu:** Từ khoảnh khắc thanh toán thành công đến khi học sinh có SBD, được enroll ClassIn, nhận đầy đủ thông tin qua Zalo OA — **hoàn toàn tự động: SBD < 2 phút, toàn chuỗi < 5 phút**. Đây là chuỗi cốt lõi loại bỏ bottleneck lớn nhất (Luồng 4 AS-IS ~14h/ngày).
 
 **Triggers:** ((SePay webhook: payment_success)).
 
-**Actors:** [SePay], [Odoo], [n8n], [ClassIn], [Zalo OA], [DuyetHS] (chỉ xử lý exception), [QLL] (xác nhận đăng nhập).
+**Actors:** [SePay], [Odoo], [.NET/Hangfire], [ClassIn], [Zalo OA], [DuyetHS] (chỉ xử lý exception), [QLL] (xác nhận đăng nhập).
 
-**Tools:** SePay webhook → Odoo (SSOT) → n8n middleware → ClassIn API V1 → Zalo OA API.
+**Tools:** SePay webhook → Odoo (SSOT) → .NET / Hangfire middleware → ClassIn API V1 → Zalo OA API.
 
 **Flow (BPMN text):**
 ```
@@ -448,7 +448,7 @@ Chuỗi giá trị HSA Education biến nhu cầu thị trường thành kết q
        ==> <Mapping tồn tại?>
             ├─ Có ==> addCourseStudent
             └─ Không ==> [HALT bước này + tạo Task exception cho DuyetHS] (xem fallback)
- ==> [B3: Zalo OA qua n8n] gửi: SBD + link ClassIn + lịch học + tên GV  (SLA < 2 phút)
+ ==> [B3: Zalo OA qua .NET/Hangfire] gửi: SBD + link ClassIn + lịch học + tên GV  (SLA < 2 phút)
  ==> [B4: Email] gửi guide đầy đủ + link cài ClassIn
  ==> [B5: Odoo Project Task cho QLL] stage="Chờ xác nhận HS đăng nhập"
  ==> [B6: <có ref_code?>] 
@@ -630,15 +630,15 @@ Chuỗi giá trị HSA Education biến nhu cầu thị trường thành kết q
 
 **Pre-conditions:**
 1. Landing page có hidden field capture `?ref=CTVxxx`, `utm_source`, `utm_campaign`, `exam_type`, `cơ sở`.
-2. n8n webhook giữa landing page và Odoo hoạt động.
+2. .NET webhook handler giữa landing page và Odoo hoạt động.
 3. Odoo CRM có sẵn Sales Team theo exam_type × cơ sở và rule auto-assign.
 4. Danh mục CTV (ctv_code) tồn tại trong Odoo.
 
 **Quy trình từng bước:**
 1. Học sinh/phụ huynh điền form (tên, SĐT, email, kỳ thi quan tâm, cơ sở).
-2. Khi submit, landing page gửi payload (gồm UTM + ref_code) tới n8n webhook.
-3. n8n chuẩn hóa dữ liệu: định dạng SĐT (`+84`/`0`), trim tên, lowercase email.
-4. n8n gọi Odoo API tạo Lead với tags: `exam_type`, `source_channel`, `cơ sở`.
+2. Khi submit, landing page gửi payload (gồm UTM + ref_code) tới .NET webhook handler.
+3. .NET/Hangfire chuẩn hóa dữ liệu: định dạng SĐT (`+84`/`0`), trim tên, lowercase email.
+4. .NET gọi Odoo API tạo Lead với tags: `exam_type`, `source_channel`, `cơ sở`.
 5. Odoo kiểm tra trùng theo SĐT/email; nếu trùng → merge và ghi log; nếu mới → tạo lead.
 6. Nếu có `ref_code` hợp lệ → gắn tag `CTV_code` vào lead.
 7. Odoo auto-assign lead cho Sales Team đúng exam_type + cơ sở (round-robin trong team).
@@ -647,7 +647,7 @@ Chuỗi giá trị HSA Education biến nhu cầu thị trường thành kết q
 **Outputs:** Lead record đầy đủ tag, đã phân công, có audit trail.
 
 **Exception handling:**
-- **Webhook fail:** n8n retry 3 lần (cách 2 phút); nếu vẫn fail → ghi vào queue dự phòng + alert TechOps; lead form lưu tạm trên landing page DB để re-sync.
+- **Webhook fail:** Hangfire retry 3 lần (cách 2 phút); nếu vẫn fail → ghi vào queue dự phòng + alert TechOps; lead form lưu tạm trên landing page DB để re-sync.
 - **Dữ liệu thiếu (SĐT sai):** tạo lead với tag `data_incomplete` → Sale bổ sung thủ công.
 - **ref_code không tồn tại:** tạo lead bình thường, tag `ref_invalid` để TP-Sale rà soát.
 
@@ -669,7 +669,7 @@ Chuỗi giá trị HSA Education biến nhu cầu thị trường thành kết q
 
 **Pre-conditions:**
 1. Playbook tư vấn với taxonomy case (Phụ lục C) đã ban hành.
-2. Chuỗi nurture (Odoo Marketing/n8n → Zalo OA) đã cấu hình theo exam_type.
+2. Chuỗi nurture (Odoo Marketing/.NET → Zalo OA) đã cấu hình theo exam_type.
 3. QA checklist hàng tuần đã có.
 
 **Quy trình từng bước:**
@@ -705,7 +705,7 @@ Chuỗi giá trị HSA Education biến nhu cầu thị trường thành kết q
 | **SLA** | Auto-reconciliation 100%; exception xử lý < 4h. |
 
 **Pre-conditions:**
-1. SePay webhook trỏ về Odoo (qua n8n nếu cần) hoạt động.
+1. SePay webhook trỏ về Odoo (qua .NET/Hangfire nếu cần) hoạt động.
 2. Mỗi đơn hàng Odoo có mã tham chiếu khớp nội dung chuyển khoản (order_ref).
 3. Quy ước nội dung chuyển khoản chuẩn hóa (chứa order_ref/SĐT).
 
@@ -743,7 +743,7 @@ Chuỗi giá trị HSA Education biến nhu cầu thị trường thành kết q
 **Pre-conditions (BẮT BUỘC trước khi automation chạy):**
 1. **Bảng mapping prerequisite tồn tại:** `hsa_course_code → classin_course_id → gv_uid → qll_user_id`.
 2. ClassIn API V1 credentials hoạt động (register, addSchoolStudent, addCourseStudent).
-3. n8n → Zalo OA API hoạt động.
+3. .NET / Hangfire → Zalo OA API hoạt động.
 4. SBD sequence generator cấu hình theo format `[KỲ_THI]-[NĂM]-[SEQ_5]`.
 5. Template Zalo OA + Email đã duyệt.
 
@@ -754,7 +754,7 @@ Chuỗi giá trị HSA Education biến nhu cầu thị trường thành kết q
    - `addSchoolStudent` → thêm HS vào trường ClassIn.
    - Lookup bảng mapping theo `hsa_course_code` của đơn.
    - `addCourseStudent` → thêm HS vào đúng khóa ClassIn.
-3. **B3 — Zalo OA (qua n8n):** gửi SBD + link ClassIn + lịch học + tên GV (< 2 phút).
+3. **B3 — Zalo OA (qua .NET/Hangfire):** gửi SBD + link ClassIn + lịch học + tên GV (< 2 phút).
 4. **B4 — Email:** gửi guide đầy đủ + link cài ClassIn/Zoom.
 5. **B5 — Tạo Task QLL** trong Odoo Project, stage `Chờ xác nhận HS đăng nhập`, gán `qll_user_id` theo mapping.
 6. **B6 — Commission:** nếu đơn có `ref_code` → cộng `commission_pending` cho CTV.
@@ -1060,7 +1060,7 @@ Chuỗi giá trị HSA Education biến nhu cầu thị trường thành kết q
 
 ## 5.4. Phương pháp đo (Measurement Method)
 
-- **SLA tự động (01, 03, 04, 12):** Odoo/n8n ghi timestamp từng bước; dashboard tính % đạt theo ngày/tuần; cảnh báo realtime khi vượt ngưỡng.
+- **SLA tự động (01, 03, 04, 12):** Odoo/.NET ghi timestamp từng bước; dashboard tính % đạt theo ngày/tuần; cảnh báo realtime khi vượt ngưỡng.
 - **SLA con người (02, 05, 09):** đo qua Odoo activity/Helpdesk ticket timestamp; báo cáo % đạt theo Sale/QLL hằng tuần.
 - **SLA tài chính (07, 08, 10, 11):** đo theo ngày phê duyệt batch/ticket trong Odoo Accounting.
 - **Báo cáo SLA:** Operations Director review % đạt toàn bộ SLA hằng tháng; mục tiêu tổng thể ≥ 95% SLA đạt.
@@ -1086,7 +1086,7 @@ Tự động hóa tại HSA tuân thủ OP-2: **tự động hóa 80% việc l�
 │  • Bảng mapping: hsa_course_code→classin_course_id→gv_uid→qll │
 │  • ClassIn API V1/V2 credentials hoạt động                    │
 │  • SePay webhook → Odoo hoạt động                             │
-│  • n8n → Zalo OA API hoạt động                               │
+│  • .NET / Hangfire → Zalo OA API hoạt động                               │
 │  • SBD sequence generator cấu hình                           │
 │  • Templates Zalo OA + Email đã duyệt                        │
 │  • Sales Team + auto-assign rule trong Odoo CRM              │
@@ -1108,7 +1108,7 @@ LUỒNG PHỤ THUỘC:
 ((SePay payment_success))
  ==> B1: Auto-generate SBD ([KỲ_THI]-[NĂM]-[SEQ_5], vd HSA-2026-08421)
  ==> B2: ClassIn API V1: register → addSchoolStudent → lookup mapping → addCourseStudent
- ==> B3: Zalo OA (qua n8n): gửi SBD + link ClassIn + lịch + GV  (< 2 phút)
+ ==> B3: Zalo OA (qua .NET/Hangfire): gửi SBD + link ClassIn + lịch + GV  (< 2 phút)
  ==> B4: Email: guide đầy đủ + link cài ClassIn
  ==> B5: Odoo Project Task cho QLL (stage "Chờ xác nhận HS đăng nhập")
  ==> B6: <ref_code?> → cộng commission_pending cho CTV
@@ -1139,7 +1139,7 @@ LUỒNG PHỤ THUỘC:
  ==> auto-assign Sales Team theo exam_type × cơ sở
  ==> <ref_code?> → tag CTV_code vào Lead
 ```
-**Fallback:** webhook fail → n8n retry 3x → queue dự phòng + alert.
+**Fallback:** webhook fail → Hangfire retry 3x → queue dự phòng + alert.
 
 ### TRIGGER 5 — Lead stage change → Hot
 ```
@@ -1166,13 +1166,13 @@ LUỒNG PHỤ THUỘC:
 | Zalo OA gửi | API down | Retry → fallback Email + Task QLL gọi điện |
 | SePay webhook | Không nhận | Đối soát dự phòng cuối ngày (re-pull) |
 | Data Subscription | Không push | TechOps pull tay qua API |
-| Lead webhook | Fail | n8n queue dự phòng + landing DB lưu tạm |
+| Lead webhook | Fail | Hangfire queue dự phòng + landing DB lưu tạm |
 
 **Nguyên tắc vàng:** automation fail **không bao giờ** được làm học sinh kẹt — luôn có đường thủ công có người chịu trách nhiệm và checklist.
 
 ## 6.5. Monitoring & Alert cho Automation Failures
 
-- **Health check:** n8n + Odoo scheduler kiểm tra endpoint (SePay, ClassIn, Zalo OA) mỗi 5 phút.
+- **Health check:** .NET/Hangfire scheduler kiểm tra endpoint (SePay, ClassIn, Zalo OA) mỗi 5 phút.
 - **Alert channel:** failure → notify TechOps qua kênh on-call (P0/P1 → ngay; P2/P3 → tổng hợp).
 - **Dead-letter queue:** mọi message fail vào queue để re-process, không mất dữ liệu.
 - **Automation dashboard:** hiển thị success rate từng trigger, số exception đang chờ, MTTR.
@@ -1406,7 +1406,7 @@ KPI tổ chức theo 5 chiều của hành trình giá trị: **Acquisition → 
 | ClassIn sập | Không dạy được | Chuyển **Zoom dự phòng** (legacy giữ sẵn); QLL thông báo nhóm Zalo lớp; ghi incident |
 | SePay gián đoạn | Không nhận thanh toán | Hướng dẫn chuyển khoản thủ công + đối soát tay tạm; bật lại auto khi khôi phục |
 | Odoo down | Mất SSOT vận hành | Read-replica/backup; quy trình thủ công có checklist; ưu tiên khôi phục P0 |
-| n8n down | Automation ngừng | Fallback thủ công cho onboarding (SOP-04); TechOps khôi phục |
+| .NET/Hangfire down | Automation ngừng | Fallback thủ công cho onboarding (SOP-04); TechOps khôi phục |
 | Zalo OA lỗi | Không gửi thông báo HS | Fallback Email + QLL gọi điện |
 | Mất nhân sự SPOF | Gián đoạn vai trò | Backup đào tạo tiếp quản trong 24h (SPOF plan) |
 
@@ -1430,7 +1430,7 @@ KPI tổ chức theo 5 chiều của hành trình giá trị: **Acquisition → 
 | Chức năng | Công cụ chuẩn | Vai trò | Ghi chú |
 |---|---|---|---|
 | System of Record / Workflow | **Odoo** | CRM, Sales, Accounting, HR, Project, Helpdesk, Documents | SSOT trung tâm |
-| Middleware / Automation | **n8n** | Cầu nối Odoo ↔ Zalo OA ↔ landing ↔ ClassIn | Đặc biệt cho Zalo (không thay bằng Email/SMS) |
+| Middleware / Automation | **.NET / Hangfire** | Cầu nối Odoo ↔ Zalo OA ↔ landing ↔ ClassIn | Đặc biệt cho Zalo (không thay bằng Email/SMS) |
 | Lớp học live | **ClassIn** | Dạy live + LMS + điểm danh | Non-replaceable |
 | Thanh toán | **SePay** | Cổng thanh toán nội địa + webhook | Non-replaceable |
 | Giao tiếp HS | **Zalo OA** | Thông báo + ZNS | Non-replaceable |
@@ -1449,7 +1449,7 @@ KPI tổ chức theo 5 chiều của hành trình giá trị: **Acquisition → 
                                       │ webhook
                                       ▼
    ┌─────────┐   webhook   ┌────────────────────┐   API   ┌──────────────┐
-   │  SePay  │────────────▶│        n8n         │────────▶│   ClassIn    │
+   │  SePay  │────────────▶│  .NET/Hangfire     │────────▶│   ClassIn    │
    │payment_ │             │   (middleware)     │ V1/V2   │ API V1/V2    │
    │success  │             │                    │◀────────│ Data Subscr. │
    └─────────┘             └─────────┬──────────┘  PUSH   │ (attendance, │
@@ -1462,7 +1462,7 @@ KPI tổ chức theo 5 chiều của hành trình giá trị: **Acquisition → 
                           │ HR | Project |     │
                           │ Helpdesk | Docs    │
                           └─────────┬──────────┘
-                                    │ via n8n
+                                    │ via .NET/Hangfire
                                     ▼
                           ┌────────────────────┐
                           │     Zalo OA        │──▶ Học sinh (thông báo, ZNS)
@@ -1477,7 +1477,7 @@ KPI tổ chức theo 5 chiều của hành trình giá trị: **Acquisition → 
 
 1. **ClassIn** — nền tảng lớp học live chuyên biệt. Tích hợp qua API V1 (enroll), V2 (createClass), Data Subscription (PUSH attendance/score/login).
 2. **SePay** — cổng thanh toán nội địa. Tích hợp qua webhook payment_success → Odoo (SSOT).
-3. **Zalo OA** — kênh giao tiếp chính với HS Việt Nam. **Không thể thay bằng Email/SMS**; tích hợp qua n8n → Zalo OA API.
+3. **Zalo OA** — kênh giao tiếp chính với HS Việt Nam. **Không thể thay bằng Email/SMS**; tích hợp qua .NET / Hangfire → Zalo OA API.
 
 ## 10.4. Odoo Module Configuration Overview
 
@@ -1503,7 +1503,7 @@ KPI tổ chức theo 5 chiều của hành trình giá trị: **Acquisition → 
 | Data Subscription (PUSH) | LMS scores (realtime) | Trigger 3 — can thiệp học tập | SOP-07 |
 | Data Subscription (PUSH) | login activity | Đo đăng nhập 24h, không login 3 ngày | SOP-06/07 |
 
-## 10.6. n8n Workflow Overview
+## 10.6. .NET/Hangfire Automation Overview
 
 | Workflow | Trigger | Hành động chính |
 |---|---|---|
@@ -1520,7 +1520,7 @@ KPI tổ chức theo 5 chiều của hành trình giá trị: **Acquisition → 
 - [ ] ClassIn API V1/V2 credentials test thành công.
 - [ ] ClassIn Data Subscription endpoint nhận được push test.
 - [ ] SePay webhook trỏ đúng + test payment_success.
-- [ ] n8n → Zalo OA API gửi test thành công.
+- [ ] .NET / Hangfire → Zalo OA API gửi test thành công.
 - [ ] SBD sequence generator chạy đúng + chống trùng khi concurrent.
 - [ ] Templates Zalo OA + Email đã duyệt nội dung.
 - [ ] Odoo Sales Team + auto-assign rule cấu hình.
@@ -1558,7 +1558,7 @@ KPI tổ chức theo 5 chiều của hành trình giá trị: **Acquisition → 
 
 ## 11.3. Phase 1 — Core Automation (Q3/2026)
 - Bật **SePay → Auto-onboarding** (SOP-04): SBD → ClassIn enroll → Zalo OA → Email → Task.
-- Tích hợp ClassIn API V1/V2; n8n → Zalo OA.
+- Tích hợp ClassIn API V1/V2; .NET/Hangfire → Zalo OA.
 - **Exit criteria:** Time-to-SBD < 2', Time-to-ClassIn-Enroll < 5', onboarding error < 1%.
 
 ## 11.4. Phase 2 — Odoo Foundation (Q4/2026–Q1/2027)
@@ -1602,7 +1602,7 @@ KPI tổ chức theo 5 chiều của hành trình giá trị: **Acquisition → 
 | ClassIn Data Subscription | endpoint nhận push, schema payload | TechOps | Vault |
 | Zalo OA | OA ID, access token, ZNS template ID | TechOps | Vault |
 | Odoo | admin, DB backup, module list, API key | TechOps | Vault |
-| n8n | workflow export, credentials store | TechOps | Vault |
+| .NET/Hangfire | job export, credentials store | TechOps | Vault |
 | hsavnu.edu.vn | hosting, landing form config, ref capture | TechOps | Vault |
 | Google Workspace | admin, domain, sharing policy | TechOps | Vault |
 | DNS/domain | registrar, records | TechOps | Vault |
@@ -1668,7 +1668,7 @@ KPI tổ chức theo 5 chiều của hành trình giá trị: **Acquisition → 
 | **Standard Operations Manual (tài liệu này)** | **HSA-SOM-v1.0** | **1.0** | **Tier 1 — chi phối toàn bộ vận hành** |
 | ClassIn API Integration Spec | (sẽ ban hành) | — | Tier 4 — chi tiết kỹ thuật |
 | Odoo Configuration Guide | (sẽ ban hành) | — | Tier 4 — cấu hình hệ thống |
-| n8n Workflow Documentation | (sẽ ban hành) | — | Tier 4 — automation |
+| .NET/Hangfire Job Documentation | (sẽ ban hành) | — | Tier 4 — automation |
 | Brand Guideline (4 team truyền thông) | (sẽ ban hành) | — | Tier 3 — chuẩn branding (giảm R10) |
 
 ---

@@ -3,6 +3,17 @@
 
 ---
 
+> ⚠️ **TRẠNG THÁI TÀI LIỆU: RESEARCH / SUPERSEDED (một phần)**
+>
+> Tài liệu này là nghiên cứu nền (source layer) — **phần fit-gap module Odoo vẫn còn giá trị tham chiếu**.
+> Tuy nhiên, các quyết định sau đây đã được **thay thế** bởi [HSA-PLATFORM-VISION-v1.0.md](docs/HSA-PLATFORM-VISION-v1.0.md) và [HSA-TECH-ROADMAP-v1.0.md](docs/HSA-TECH-ROADMAP-v1.0.md):
+> - **Odoo edition:** Tài liệu này đề xuất Enterprise/Custom → Đã chốt: **Odoo Community (miễn phí, self-host)**
+> - **Middleware:** Tài liệu này đề xuất n8n → Đã chốt: **.NET 10 / Hangfire (tự xây)**
+> - **Chi phí license:** 325–565 triệu/năm (Enterprise) → Thực tế: **0 đồng (Community)**
+> - **Lộ trình:** 4 GĐ A-D trong file này → Đã được thay bởi **Phase 0–5 trong PLATFORM-VISION §8**
+
+---
+
 **Loại tài liệu:** Phân tích đánh giá phù hợp Odoo, kiến trúc chuyển đổi và lộ trình triển khai chi tiết
 **Tài liệu đầu vào:** [phan-tich-hien-trang-van-hanh-hsa-education-q2-2026.md](phan-tich-hien-trang-van-hanh-hsa-education-q2-2026.md)
 **Phạm vi:** Chuyển các điểm nghẽn, rủi ro và nợ vận hành từ báo cáo hiện trạng thành target architecture, fit-gap Odoo, kế hoạch dữ liệu, tích hợp và rollout
