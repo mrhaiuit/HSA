@@ -21,7 +21,7 @@
 | 1.0 | 2026-06-16 | Bản gốc: hiện trạng, vấn đề, đề xuất, ROI, lộ trình. |
 | 1.1 | 2026-06-16 | Bổ sung PHẦN 1B — Phân tích thị trường (TAM/SAM/Market Share); mở rộng PHẦN 2 (14 nút thắt N1–N14 + vấn đề nhóm Zalo); thêm PHẦN 2A — Các rủi ro ẩn dự báo tương lai (P1–P8); cập nhật PHẦN 0 với lập luận thị trường & Đà Nẵng. |
 | **1.2** | **2026-06-16** | Tuyển CTO (50–100M/năm), timeline thực T7/2026–T3/2028, HCM ×2/×1.5, thêm PHẦN 2B bảo mật. |
-| **1.3** | **2026-06-16** | **Bổ sung B0 (lỗ hổng mã KM đang gây thất thoát doanh thu — xác nhận thực tế); chi tiết hành trình 8 bước học sinh; lỗ hổng duyệt Zalo không đối chiếu tên; nhấn mạnh dữ liệu cá nhân phân tán không kiểm soát; sửa đơn giá HS từ 15 triệu → 2–3 triệu (đúng thực tế); bổ sung bảng suy giảm trải nghiệm học viên theo scale.** |
+| **1.3** | **2026-06-16** | B0 promo code revenue leak; hành trình 8 bước học sinh; Zalo approval SPOF; dữ liệu phân tán không cứu vãn; giá 2–3M/HS; bảng scale vs UX; P9 phụ huynh — doanh thu ẩn 3,2–10,8 tỷ/năm bị bỏ ngỏ. |
 
 ---
 
@@ -464,7 +464,33 @@ Hiện HSA **không có hệ thống theo dõi chuyên cần tự động** → 
 
 Google Sheet đang bị HSA dùng như một **database thực sự** (N8) — vai trò nó không được thiết kế để gánh. Google Sheet có **giới hạn cứng: ~10 triệu ô/file và ~200 người dùng đồng thời** — và HSA **đang tiếp cận các ngưỡng này**. Khi **~70 giảng viên + 132 CTV + đội HN + đội HCM** cùng truy cập các file lớn (danh sách học sinh, thù lao, hoa hồng), hệ quả điển hình là **chậm, treo, lỗi đồng bộ, thậm chí corruption (mất/hỏng dữ liệu)**. Đã có nhiều tiền lệ ở các doanh nghiệp Việt Nam tương tự: **Sheet bị "treo" đúng đợt cao điểm** — chính là lúc không được phép hỏng. Một sự cố mất dữ liệu thù lao/hoa hồng giữa đợt khai giảng có thể gây khủng hoảng niềm tin với cả giảng viên lẫn CTV. **Giải pháp:** chuyển sang **database thực sự** (Odoo + Integration DB) — được thiết kế cho hàng triệu bản ghi và hàng trăm người dùng đồng thời, có sao lưu và toàn vẹn dữ liệu.
 
-> **Tổng kết PHẦN 2A:** 8 rủi ro ẩn này có chung một đặc điểm — **chúng đều có thể dự báo, và đều có cùng một lời giải gốc: chuyển từ vận hành thủ công phân tán sang một hệ thống tích hợp, có dữ liệu tập trung.** Hành động hôm nay (khi chúng còn là "dự báo") rẻ hơn rất nhiều so với xử lý khủng hoảng ngày mai.
+## P9 — Chưa khai thác dữ liệu phụ huynh — bỏ lỡ tệp khách hàng dễ tiếp cận nhất (rủi ro doanh thu)
+
+Hiện tại HSA thu thập tên + số điện thoại học sinh và **gần như không lưu thông tin phụ huynh có cấu trúc**. Đây là một lỗ hổng doanh thu nghiêm trọng bị ẩn sau vẻ ngoài "vận hành bình thường":
+
+**Phụ huynh là tệp khách hàng nóng nhất mà HSA đang bỏ qua:**
+- Một phụ huynh có con học tại HSA đã **tin tưởng HSA, đã trả tiền, đã thấy kết quả** (hoặc đang chờ thấy kết quả). Đây là mức độ tin tưởng cao nhất có thể có với một thương hiệu giáo dục.
+- Nếu gia đình có **2–3 con ở độ tuổi thi**, xác suất chuyển đổi mua khóa học tiếp theo **cao hơn 5–10 lần** so với một khách hàng lạnh.
+- **Hiện HSA không biết**: gia đình HS X có còn em nhỏ không? Phụ huynh em nào đang có con sắp đến tuổi thi? Phụ huynh nào đang trong mạng lưới có thể giới thiệu thêm?
+
+**Ví dụ cơ hội bị bỏ lỡ mỗi ngày:**
+- HS học ĐGNL HSA → thi xong → phụ huynh có em nhỏ 2 năm nữa thi → **không ai tiếp cận** vì không có hệ thống theo dõi
+- Phụ huynh hài lòng → sẵn sàng giới thiệu → **không có quy trình CTV phụ huynh**, không có cơ chế khai thác referral từ network phụ huynh
+- Gia đình có 3 con lần lượt thi các năm → tiềm năng doanh thu 3 lần từ cùng 1 gia đình → **bị đối xử như 3 khách hàng lạ, không nhận diện được mối liên hệ**
+
+**Quy mô cơ hội bị bỏ ngỏ:**
+- 20.000 học sinh × trung bình 1,2 anh/em trong độ tuổi thi → **~4.000–6.000 học sinh tiềm năng trong gia đình hiện tại** mà HSA chưa tiếp cận có hệ thống
+- Tỉ lệ chuyển đổi tệp warm (phụ huynh đã tin tưởng) ước tính 40–60% → **~1.600–3.600 học sinh bổ sung/năm** có thể tiếp cận mà không tốn chi phí marketing
+- Ở đơn giá 2–3 triệu/HS → **~3,2–10,8 tỷ VND/năm doanh thu tiềm năng bỏ lỡ** từ tệp khách hàng sẵn có
+
+**Tại sao chưa làm được:**
+- Không có CRM tập trung → không lưu số điện thoại phụ huynh có cấu trúc
+- Không có trường "liên kết gia đình" → không biết HS A và HS B là anh em
+- Không có workflow chăm sóc phụ huynh sau khi HS hoàn thành khóa học
+
+**Giải pháp:** Khi xây dựng hệ thống mới, **bổ sung profile phụ huynh vào data model**: số điện thoại, email, số con, năm dự kiến thi của từng con → từ đó xây dựng **quy trình chăm sóc phụ huynh bán tự động** (cảnh báo khi em nhỏ đến gần tuổi thi, chiến dịch referral có cơ chế, phân khúc family loyalty).
+
+> **Tổng kết PHẦN 2A:** 9 rủi ro ẩn này có chung một đặc điểm — **chúng đều có thể dự báo, và đều có cùng một lời giải gốc: chuyển từ vận hành thủ công phân tán sang một hệ thống tích hợp, có dữ liệu tập trung.** Hành động hôm nay (khi chúng còn là "dự báo") rẻ hơn rất nhiều so với xử lý khủng hoảng ngày mai. Và P9 nhắc nhở thêm: chuyển đổi số không chỉ là giảm chi phí — nó còn **mở ra nguồn doanh thu mới từ dữ liệu hiện có.**
 
 ---
 
