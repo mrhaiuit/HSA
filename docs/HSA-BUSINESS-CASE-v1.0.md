@@ -404,7 +404,49 @@ Hiện tại số liệu vận hành nằm rải rác trên 7 công cụ + Drive
 
 > **Câu hỏi BGĐ không trả lời nhanh được hôm nay:** "Hôm nay HCM tuyển được bao nhiêu HS? Tỉ lệ chốt theo từng CTV? Doanh thu theo từng kỳ thi tuần này so với tuần trước?" — tất cả đều cần tổng hợp tay nhiều giờ.
 
-## 2.6 Vấn đề nhóm Zalo — quả bom hẹn giờ
+**Điểm mù đặc biệt nghiêm trọng: không đo được ROI Marketing**
+
+Hiện tại HSA đang đầu tư vào nhiều kênh marketing (Facebook Ads, TikTok, CTV giới thiệu, landing page, SEO…) nhưng **không có khả năng đo lường hiệu suất từng kênh**:
+
+| Câu hỏi marketing cốt lõi | Có trả lời được không? |
+|---|---|
+| Chi phí thu hút 1 học sinh (CAC) theo từng kênh? | ❌ Không biết |
+| Kênh nào có tỉ lệ chuyển đổi cao nhất (lead → chốt → thanh toán)? | ❌ Không biết |
+| Chiến dịch quảng cáo tháng trước có ROI dương không? | ❌ Không biết |
+| CTV nào đang mang về học sinh chất lượng (học hết khóa, giới thiệu thêm)? | ❌ Không biết |
+| Học sinh từ kênh nào có tỉ lệ refund thấp nhất? | ❌ Không biết |
+
+**Hệ quả:** ngân sách marketing được phân bổ theo **cảm tính và thói quen**, không theo hiệu suất thực. Có thể 80% ngân sách đang đổ vào kênh kém hiệu quả nhất mà không ai biết. Đây là **rò rỉ chi phí vô hình** — không được phản ánh trong bảng tổng kết nhưng tích lũy mỗi tháng.
+
+> Với hệ thống tích hợp: mỗi học sinh được tag nguồn gốc (kênh, chiến dịch, CTV) từ lúc là lead → đến khi chốt → đến khi hoàn thành khóa học → tỉ lệ chuyển đổi và ROI từng kênh được tính tự động, thời gian thực.
+
+## 2.6 Chi phí cơ hội vô hình: lãnh đạo kinh doanh bị vùi đầu trong vận hành
+
+Đây là rủi ro **ít được đặt tên nhất nhưng ảnh hưởng chiến lược lớn nhất** trong toàn bộ bức tranh hiện trạng.
+
+Khi hệ thống vận hành thủ công, **ai là người giải quyết các vấn đề phát sinh mỗi ngày?** Không phải nhân viên cấp thực thi — mà chính là **Giám đốc kinh doanh, Giám đốc chi nhánh, Trưởng khu vực**. Những người được kỳ vọng làm nhiệm vụ chiến lược đang bị kéo vào:
+
+- **Đối soát thanh toán SePay** khi kế toán không khớp
+- **Duyệt học sinh vào lớp Zalo** khi nhân viên phụ trách nghỉ phép
+- **Tính lại hoa hồng CTV** khi có tranh chấp
+- **Xử lý khiếu nại học sinh chờ quá lâu** trong giờ cao điểm
+- **Tổng hợp báo cáo tay** để báo cáo lên BGĐ
+
+**Cái giá thực sự:**
+
+| Thời gian lãnh đạo bị "đốt" vào vận hành | Cái không được làm thay thế |
+|---|---|
+| Xử lý 260 HS/ngày đợt khai giảng HCM | Gặp gỡ đối tác kênh phân phối mới |
+| Đối soát hoa hồng 132 CTV cuối tháng | Thiết kế chiến lược CTV mới cho Đà Nẵng |
+| Họp nội bộ giải quyết mâu thuẫn dữ liệu Sheet | Nghiên cứu đối thủ và điều chỉnh chương trình học |
+| Báo cáo thủ công lên BGĐ | Thị sát chất lượng giảng dạy thực tế |
+| Duyệt thay nhân viên nghỉ | Xây dựng quan hệ với trường THPT mới |
+
+> **Nghịch lý vận hành:** HSA đang phát triển ở quy mô cần **lãnh đạo chiến lược**, nhưng hệ thống thủ công đang biến lãnh đạo thành **người vận hành hạng nặng**. Mỗi giờ Giám đốc kinh doanh ngồi đối soát dữ liệu là một giờ không ai nhìn ra thị trường, không ai nâng chất lượng chương trình, không ai mở kênh mới. Đây là chi phí cơ hội vô hình nhưng **ảnh hưởng trực tiếp đến tăng trưởng dài hạn** — không xuất hiện trong bảng lương nhưng thể hiện ở chỗ HSA phát triển chậm hơn tiềm năng.
+
+**Sau khi tự động hóa:** lãnh đạo kinh doanh nhận thông báo tự động thay vì đối soát tay; nhân viên tự xử lý ngoại lệ qua hệ thống thay vì leo thang lên giám đốc; BGĐ có dashboard xem số ngay thay vì chờ báo cáo. **Năng lực lãnh đạo được giải phóng để tập trung vào những gì thực sự tạo ra giá trị.**
+
+## 2.7 Vấn đề nhóm Zalo — quả bom hẹn giờ
 
 Đây là nút thắt **N11** được phân tích riêng vì mức độ nghiêm trọng của nó với tham vọng scale.
 
