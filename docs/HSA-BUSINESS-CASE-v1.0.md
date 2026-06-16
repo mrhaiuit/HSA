@@ -933,6 +933,59 @@ Bảng dưới đây ánh xạ các vấn đề trọng yếu (đã phân tích 
 | 17 | Marketing đo ROI từng kênh | Không biết kênh nào hiệu quả | **Dashboard attribution realtime** |
 | 18 | Giám đốc kinh doanh dùng thời gian | Đối soát tay, xử lý sự vụ | **Tập trung mở rộng thị trường** |
 
+## 3.8 Xây dựng lại nền tảng Website — Điểm tiếp xúc tài chính quan trọng nhất
+
+> Website **hsavnu.edu.vn** là nơi học sinh gặp HSA lần đầu, nơi ra quyết định mua và nơi thực hiện thanh toán. Hiện tại nó đang gánh nhiều hạn chế nghiêm trọng cần được giải quyết cùng với việc xây dựng HSA Integration Platform.
+
+### Hạn chế hiện tại của hsavnu.edu.vn (đã khảo sát thực tế)
+
+| # | Hạn chế | Mức độ | Ảnh hưởng |
+|---|---|---|---|
+| **1** | **Mã khuyến mãi không validate phía server** (B0) | 🔴 CRITICAL | Thất thoát doanh thu đang xảy ra |
+| **2** | **Dữ liệu khoá học thiếu**: thời lượng hiển thị "0 giờ 0 phút" — bug dữ liệu chưa được điền | 🟠 CAO | Giảm độ tin cậy, học sinh không có đủ thông tin để quyết định |
+| **3** | **Không có luồng thanh toán thông minh**: sau khi nhấn "Đăng ký học", học sinh phải trải qua 8 bước thủ công (xem Phần 2.1) | 🔴 CAO | Tỉ lệ rời bỏ cao, trải nghiệm kém |
+| **4** | **Không có dashboard học sinh** sau khi đăng nhập: không thấy SBD, lịch học, tình trạng khóa học | 🟠 CAO | Học sinh phải hỏi nhân viên để biết trạng thái |
+| **5** | **Email doanh nghiệp dùng Gmail** (hsaeducation.jsc@gmail.com): không chuyên nghiệp, không có SPF/DKIM đảm bảo, email tự động dễ vào spam | 🟠 CAO | Email thông báo SBD, hướng dẫn có thể không tới tay học sinh |
+| **6** | **CDN Digital Ocean Spaces** (không phải Cloudflare): tốc độ tải trang tại Việt Nam kém hơn, không có DDoS protection mặc định | 🟡 TB | Trang chậm → tăng tỉ lệ bounce, giảm SEO |
+| **7** | **Không có social proof** (đánh giá, điểm số cựu học sinh, tỉ lệ đỗ): học sinh không có cơ sở so sánh với đối thủ | 🟠 CAO | Giảm tỉ lệ chuyển đổi từ khách truy cập → mua |
+| **8** | **Thiếu cơ chế live chat / hỏi nhanh**: học sinh có câu hỏi → không thể hỏi ngay → thoát trang | 🟡 TB | Mất khách hàng ở giai đoạn cân nhắc |
+| **9** | **Không có portal CTV** tích hợp: CTV không tự xem được hiệu suất và hoa hồng | 🟠 CAO | CTV thiếu động lực, tranh chấp tăng |
+| **10** | **Không có portal phụ huynh**: phụ huynh không theo dõi được tiến trình con | 🟡 TB | Mất cơ hội gắn kết, giảm cơ hội upsell |
+| **11** | **Bảo mật B1–B7** (HMAC, CSRF, MFA, rate limiting) — chi tiết tại PHẦN 2B | 🔴 CRITICAL | Rủi ro hack, mất dữ liệu, gian lận |
+| **12** | **Form đăng ký giới hạn năm sinh 2006–2009**: bỏ sót học sinh lớn tuổi (BCA, BQP có thí sinh đến 25 tuổi) | 🟡 TB | Mất khách hàng tiềm năng ở phân khúc BCA/BQP |
+
+### Roadmap xây dựng lại Website (tích hợp với lộ trình 4 GĐ)
+
+```
+GĐ 0 (T8–9/2026): Security hardening
+├── Fix B0: server-side coupon validation
+├── Fix B1: HMAC webhook verification
+├── Fix B2: bcrypt thay MD5
+└── Fix B3–B7: CSRF, reCAPTCHA, MFA admin
+
+GĐ 1 (T10–12/2026): Onboarding flow rebuild
+├── Sau thanh toán: redirect thẳng vào "trang chờ" realtime
+│   (hiển thị tiến trình: ✅ SBD đã tạo → ✅ ClassIn đã kích hoạt → ✅ Zalo group)
+├── Xóa form khai báo thứ 2 sau thanh toán — lấy từ dữ liệu đăng ký
+└── Student dashboard: SBD, lịch học, trạng thái gói
+
+GĐ 2 (T2–4/2027): CTV & Social Proof
+├── CTV portal: xem hoa hồng realtime, link ref, danh sách học sinh giới thiệu
+├── Thêm social proof: điểm cựu học sinh, tỉ lệ đỗ theo kỳ, đánh giá
+├── Tích hợp Zalo Mini App hoặc live chat widget
+└── Fix data bug "0 giờ 0 phút", điền đầy đủ thông tin khoá học
+
+GĐ 3 (T5–10/2027): Parent & Marketing
+├── Parent portal: xem tiến trình, điểm danh, alert vắng học
+├── Marketing attribution: tag UTM + CTV ref vào mọi conversion
+├── Chuyển sang email hosting chuyên nghiệp (Google Workspace đã có)
+└── Chuyển CDN sang Cloudflare (free tier đủ, tốt hơn DO Spaces)
+```
+
+### Lưu ý về hsa.edu.vn
+
+> **Làm rõ cho BGĐ:** website `hsa.edu.vn` (không có "vnu" trong tên) là **cổng đăng ký kỳ thi chính thức của Đại học Quốc gia Hà Nội** — do ĐHQG HN vận hành, không phải do HSA Education. Website của HSA Education (công ty) là `hsavnu.edu.vn`. Hai site phục vụ mục đích khác nhau và thuộc hai tổ chức khác nhau. Việc xây dựng lại trong đề xuất này áp dụng cho `hsavnu.edu.vn`.
+
 ---
 
 # PHẦN 4 — LỢI ÍCH KỲ VỌNG
