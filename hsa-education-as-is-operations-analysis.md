@@ -82,7 +82,7 @@ Dữ liệu học sinh nằm rải rác giữa: form web → Google Sheet → EZ
 
 ```
                     HĐQT / Đồng sáng lập
-                    (Hoa · Thầy Khương)
+                    (Thầy Hoa · Thầy Khương)
                             │
               ┌─────────────┴─────────────┐
               │                           │
@@ -102,7 +102,7 @@ Dữ liệu học sinh nằm rải rác giữa: form web → Google Sheet → EZ
 
 | Vị trí | SL | Phạm vi |
 |---|---|---|
-| Đồng sáng lập / HĐQT | 2 | Hoa, Thầy Khương — quản lý toàn tổ chức |
+| Đồng sáng lập / HĐQT | 2 | Thầy Hoa, Thầy Khương — quản lý toàn tổ chức |
 | GĐ Vận hành Bắc | 1 | 3 kỳ thi: HSA, BCA, BQP |
 | GĐ Vận hành Nam | 1 | 1 kỳ thi: ĐGNL HCM |
 
