@@ -11,6 +11,8 @@
 > - **Middleware:** Tài liệu này đề xuất n8n → Đã chốt: **.NET 10 / Hangfire (tự xây)**
 > - **Chi phí license:** 325–565 triệu/năm (Enterprise) → Thực tế: **0 đồng (Community)**
 > - **Lộ trình:** 4 GĐ A-D trong file này → Đã được thay bởi **Phase 0–5 trong PLATFORM-VISION §8**
+>
+> **Quyết định cuối (đã được BGĐ phê duyệt):** **Không triển khai Odoo**. Thay thế bằng MISA SME Online (kế toán) + .NET Platform (nghiệp vụ). Xem [HSA-PLATFORM-VISION-v1.0.md](docs/HSA-PLATFORM-VISION-v1.0.md) §6.
 
 ---
 

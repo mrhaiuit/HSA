@@ -10,12 +10,12 @@
 | **Tác giả** | Senior BA + Principal PO |
 | **Đối tượng** | Developer (Founder/COO, 10 năm .NET, tự viết code) |
 | **Trạng thái** | Approved for Implementation |
-| **Phạm vi** | Build .NET middleware tích hợp ngoài, giữ EZSale giai đoạn đầu, Odoo Community làm data warehouse + UI phụ |
+| **Phạm vi** | Build .NET middleware tích hợp ngoài, giữ EZSale giai đoạn đầu, MISA SME Online (kế toán) + PostgreSQL HSA (data warehouse) |
 
 **Nguyên tắc cốt lõi của tài liệu này:**
 - Phân biệt rõ **"làm ngay"** (Phase 0-2) vs **"làm sau"** (Phase 3+) để tránh over-engineering.
 - EZSale CRM **GIỮ NGUYÊN** giai đoạn đầu — middleware chỉ **READ**, không write vào EZSale.
-- Odoo Community = data warehouse + UI phụ, **KHÔNG** là CRM chính trong Phase 1-2.
+- PostgreSQL HSA = data warehouse + SSOT; MISA SME Online = kế toán chính thức (nhận sync 1 chiều). **KHÔNG dùng Odoo.**
 - Mọi code snippet phải compile được; mọi DB schema production-ready; mọi User Story có AC đủ để test.
 
 ---
@@ -24,7 +24,7 @@
 
 ## 1.1 Vision Statement
 
-> HSA Integration Platform là lớp middleware .NET đứng giữa các hệ thống rời rạc của HSA Education (Web Portal, SePay, EZSale, ClassIn, Zalo OA) nhằm **tự động hóa toàn bộ chuỗi onboarding học sinh từ lúc thanh toán đến lúc sẵn sàng học** trong dưới 2 phút, **biến dữ liệu học tập từ ClassIn thành hành động chăm sóc chủ động**, và **xây dựng một data warehouse (Odoo Community) làm nguồn sự thật duy nhất** cho báo cáo vận hành & tài chính — tất cả mà không phá vỡ quy trình EZSale hiện hữu, cho phép migrate dần khi doanh nghiệp sẵn sàng.
+> HSA Integration Platform là lớp middleware .NET đứng giữa các hệ thống rời rạc của HSA Education (Web Portal, SePay, EZSale, ClassIn, Zalo OA) nhằm **tự động hóa toàn bộ chuỗi onboarding học sinh từ lúc thanh toán đến lúc sẵn sàng học** trong dưới 2 phút, **biến dữ liệu học tập từ ClassIn thành hành động chăm sóc chủ động**, và **xây dựng PostgreSQL HSA làm nguồn sự thật duy nhất (kế toán sync 1 chiều lên MISA SME Online)** cho báo cáo vận hành & tài chính — tất cả mà không phá vỡ quy trình EZSale hiện hữu, cho phép migrate dần khi doanh nghiệp sẵn sàng.
 
 ## 1.2 Success Metrics — 5 OKRs
 
@@ -37,14 +37,14 @@
 | **OKR-5: Minh bạch hoa hồng CTV** | Thời gian chốt báo cáo hoa hồng cuối tháng | 1-2 ngày thủ công | **< 5 phút** (batch tự động) + CTV self-service xem realtime | thời gian chạy batch job |
 
 **Định nghĩa "ONBOARDED" (Definition of Success cho 1 HS):**
-SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZNS (hoặc fallback email) `AND` đã tạo record Odoo `AND` đã tạo QLL Task.
+SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZNS (hoặc fallback email) `AND` đã tạo record trong PostgreSQL HSA `AND` đã tạo QLL Task.
 
 ## 1.3 Constraint Matrix
 
 ### PHẢI LÀM (Must — không thương lượng)
 - Middleware .NET đứng ngoài, **không sửa** core Web Portal trừ việc gọi `POST /api/leads` và truyền `ref_code`.
 - **Idempotency tuyệt đối**: 1 `sepay_transaction_id` → tối đa 1 SBD, 1 lần enroll.
-- Mọi external API call (ClassIn/Zalo/Odoo) phải **async + retry + dead-letter**.
+- Mọi external API call (ClassIn/Zalo/MISA) phải **async + retry + dead-letter**.
 - Lưu **mọi** webhook payload (raw) để replay/audit.
 - Lưu lại `classin_uid`, `classin_course_id`, GV `uid` — không lưu thì automation chết (ClassIn không có query API đầy đủ).
 
@@ -54,12 +54,12 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
 - **KHÔNG** build SPA frontend phức tạp ở Phase 1 — dashboard dùng server-rendered HTML + ít JS.
 - **KHÔNG** dùng microservices — 1 monolith modular .NET là đủ cho tải hiện tại (~55 HS/ngày, spike 260/ngày).
 - **KHÔNG** tự build queue/scheduler — dùng Hangfire.
-- **KHÔNG** dùng Odoo Enterprise (license phí; Community đủ cho warehouse + UI phụ).
+- **KHÔNG** dùng Odoo (cả Community lẫn Enterprise); dùng MISA SME Online cho kế toán + .NET Finance Service cho nghiệp vụ đặc thù.
 - **KHÔNG** đụng tới `modifyCourseTeacher` cho per-lesson (V1 đổi GV cho TẤT CẢ buổi chưa bắt đầu — dùng V2 `createClass` với `teacherUid` per buổi).
 
 ### CÓ THỂ LÀM SAU (Could — defer, không block Phase 1-2)
-- Migrate EZSale → Odoo CRM (Phase 3+, EPIC-08).
-- Meta Lead Ads → Odoo Social.
+- Migrate EZSale → .NET CRM module (Phase 3+, EPIC-08).
+- Meta Lead Ads → .NET CRM (lead capture).
 - NPS survey, Helpdesk ticketing.
 - Executive dashboard nâng cao, weekly auto-report.
 - Redis cache (chỉ thêm khi đo thấy contention; PostgreSQL row lock đã đủ cho SBD sequence ở tải hiện tại).
@@ -90,15 +90,15 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
  │                                                                       │
  └───┬────────┬─────────┬──────────┬──────────┬──────────┬───────────┬───┘
      │        │         │          │          │          │           │
-     │ POST   │ webhook │ V1/V2 +  │ ZNS/msg  │ JSON-RPC │ READ-only │ read
-     │ /leads │ payment │ Data Sub │          │          │ API       │ (giảm dần)
+     │ POST   │ webhook │ V1/V2 +  │ ZNS/msg  │ MISA API │ READ-only │ read
+     │ /leads │ payment │ Data Sub │          │ (sync 1c)│ API       │ (giảm dần)
      ▼        ▼         ▼          ▼          ▼          ▼           ▼
 ┌─────────┐┌───────┐┌──────────┐┌────────┐┌──────────┐┌─────────┐┌──────────┐
-│   Web   ││ SePay ││ ClassIn  ││Zalo OA ││  Odoo    ││ EZSale  ││  Google  │
-│ Portal  ││(thanh ││(LMS, lớp ││(ZNS,   ││Community ││  CRM    ││  Sheet   │
-│hsavnu.  ││ toán) ││học, data ││ chat)  ││(NEW —    ││(GIỮ —   ││(legacy,  │
-│edu.vn   ││       ││subscript)││        ││warehouse ││read-only││ giảm dần)│
-│         ││       ││ CN server││        ││+ UI phụ) ││ adapter)││          │
+│   Web   ││ SePay ││ ClassIn  ││Zalo OA ││  MISA    ││ EZSale  ││  Google  │
+│ Portal  ││(thanh ││(LMS, lớp ││(ZNS,   ││SME Online││  CRM    ││  Sheet   │
+│hsavnu.  ││ toán) ││học, data ││ chat)  ││(kế toán  ││(GIỮ —   ││(legacy,  │
+│edu.vn   ││       ││subscript)││        ││chính thức││read-only││ giảm dần)│
+│         ││       ││ CN server││        ││sync 1 ch)││ adapter)││          │
 └─────────┘└───────┘└──────────┘└────────┘└──────────┘└─────────┘└──────────┘
   EXTERNAL   EXT      EXTERNAL     EXT       NEW          EXT        LEGACY
 ```
@@ -108,8 +108,8 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
 - **SePay → Platform**: webhook xác nhận thanh toán (trigger onboarding).
 - **Platform → ClassIn**: enroll HS (V1), tạo buổi học/đổi GV (V2). **ClassIn → Platform**: Data Subscription push (attendance, scores, login).
 - **Platform → Zalo OA**: ZNS gửi SBD/cảnh báo. **Platform → Email**: hướng dẫn.
-- **Platform ↔ Odoo**: JSON-RPC tạo/cập nhật student, sales order, task, payslip draft.
-- **Platform ← EZSale**: READ-only sync leads sang Odoo (Phase 2-3).
+- **Platform → MISA SME Online**: MISA API push journal entries (sync 1 chiều, kế toán chính thức); student/sales order/task/payslip lưu trong PostgreSQL HSA.
+- **Platform ← EZSale**: READ-only sync leads sang .NET CRM module (Phase 2-3).
 
 ## 2.2 Container Diagram (C4 Level 2)
 
@@ -138,7 +138,7 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
 ║  │  OnboardingRetryJob        │   │  ClassInV1Client / V2Client    │      ║
 ║  │  CommissionBatchJob        │   │  SePayWebhookValidator         │      ║
 ║  │  ClassInSyncJob            │   │  ZaloOAClient                  │      ║
-║  │  DailyReportJob            │   │  OdooJsonRpcClient             │      ║
+║  │  DailyReportJob            │   │  MisaSyncClient (REST API)     │      ║
 ║  │  SePayReconcileJob (cron)  │   │  EZSaleClient (read-only)      │      ║
 ║  └────────────────┬───────────┘   └───────────────┬────────────────┘      ║
 ║                   │                                │                       ║
@@ -146,9 +146,9 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
 ║                                ▼                                          ║
 ║  ┌─────────────────────────────────────────────────────────────────┐     ║
 ║  │  PostgreSQL 16                                                    │     ║
-║  │  • hsa_integration DB (EF Core Code-First — middleware tables)   │     ║
+║  │  • hsa_platform DB (EF Core Code-First — DB DUY NHẤT, SSOT)      │     ║
 ║  │  • Hangfire schema (job storage)                                 │     ║
-║  │  • Odoo DB = SEPARATE DB (xem ADR-04)                            │     ║
+║  │  • MISA SME = external accounting (sync 1 chiều, xem ADR-04)     │     ║
 ║  └─────────────────────────────────────────────────────────────────┘     ║
 ║                                                                           ║
 ║  ┌──────────────┐   ┌──────────────┐   (optional, defer)                  ║
@@ -174,34 +174,33 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
 ### ADR-02: Giữ EZSale giai đoạn đầu
 **Status:** Accepted
 **Context:** Sale đang quen EZSale; thay ngay = rủi ro gián đoạn doanh thu.
-**Decision:** Phase 1-2 giữ EZSale, middleware chỉ READ. Mirror lead sang Odoo song song.
-**Rationale:** Giảm rủi ro vận hành; cho phép so sánh Odoo vs EZSale trước khi cut-over.
-**Consequences:** Tạm thời 2 nguồn lead (EZSale + Odoo mirror) → phải dedupe theo SĐT. Migration để Phase 3 (EPIC-08).
+**Decision:** Phase 1-2 giữ EZSale, middleware chỉ READ. Mirror lead sang .NET CRM module song song.
+**Rationale:** Giảm rủi ro vận hành; cho phép so sánh .NET CRM vs EZSale trước khi cut-over.
+**Consequences:** Tạm thời 2 nguồn lead (EZSale + .NET CRM mirror) → phải dedupe theo SĐT. Migration để Phase 3 (EPIC-08).
 
-### ADR-03: Odoo Community thay vì Enterprise
-**Status:** Accepted
-**Context:** Cần warehouse + CRM/Accounting/HR/Project modules.
-**Decision:** Odoo 17 Community.
-**Rationale:** Community đủ cho CRM, Sales, Accounting cơ bản, Project, HR. Tránh phí license/HS. Tích hợp qua JSON-RPC nên không phụ thuộc tính năng Enterprise UI.
-**Consequences:** Thiếu vài tính năng Enterprise (Studio, advanced accounting, dashboards đẹp). Bù bằng custom fields + dashboard riêng của middleware. Helpdesk/NPS sẽ cần module Community tương đương hoặc OCA.
+### ADR-03: Không dùng Odoo — MISA SME Online + .NET Finance Service
+**Status:** Accepted (quyết định BGĐ supersede phương án Odoo)
+**Context:** Cần kế toán chính thức chuẩn pháp lý VN + nghiệp vụ tài chính đặc thù (hoa hồng, thù lao, đối soát).
+**Decision:** **Không triển khai Odoo.** Dùng **MISA SME Online** cho kế toán chính thức (~3–6 triệu/năm) + tự xây **.NET Finance Service** cho nghiệp vụ đặc thù (hoa hồng CTV, thù lao GV, đối soát SePay, mã khuyến mãi). CRM/lead xây trong **.NET CRM module**; báo cáo dùng **.NET Report Service + Metabase/Superset**.
+**Rationale:** Odoo chưa phù hợp thị trường VN (kế toán VN chưa quen, chuẩn pháp lý phức tạp); MISA là phần mềm kế toán chuẩn tại VN, kế toán HSA đã quen, có REST API để sync. Nghiệp vụ đặc thù HSA không có ERP nào phủ sẵn → tự xây trên .NET.
+**Consequences:** Phải tự xây .NET Finance/CRM/Report (chi phí nhân sự CTO). Đổi lại làm chủ toàn bộ logic nghiệp vụ; MISA chỉ là hệ kế toán bên ngoài nhận sync 1 chiều, dễ thay thế.
 
-### ADR-04: Separate database (Integration DB ≠ Odoo DB)
+### ADR-04: PostgreSQL HSA là DB chính; MISA là external accounting (sync 1 chiều)
 **Status:** Accepted
-**Context:** Middleware và Odoo đều dùng PostgreSQL.
-**Decision:** **2 database riêng biệt** trên cùng instance PostgreSQL: `hsa_integration` (EF Core Code-First) và `hsa_odoo` (Odoo quản lý schema).
+**Context:** HSA cần 1 nguồn sự thật duy nhất; kế toán chính thức nằm ngoài (MISA SME Online).
+**Decision:** **1 database duy nhất** `hsa_platform` (PostgreSQL 16, EF Core Code-First) làm SSOT cho mọi nghiệp vụ. **MISA SME Online là external accounting system** nhận **sync 1 chiều (.NET → MISA)** qua MISA API. Không còn 2 DB (Integration DB + Odoo DB).
 **Rationale:**
-- Odoo schema do Odoo ORM sở hữu — EF Core migration chạm vào sẽ vỡ khi Odoo upgrade.
-- Tách biệt ownership → không xung đột migration; backup/restore độc lập.
-- Giao tiếp qua JSON-RPC (business-level API) thay vì SQL trực tiếp → an toàn khi Odoo nâng cấp (xem TR-07).
-**Consequences:** Không JOIN cross-DB trực tiếp; đồng bộ qua API + lưu `odoo_partner_id` trong `hsa_students` để map. Chấp nhận eventual consistency cho dữ liệu mirror.
+- HSA sở hữu hoàn toàn schema dữ liệu lõi — không khóa cứng vào phần mềm kế toán bên thứ ba.
+- Chỉ push journal entries lên MISA qua API (business-level), không truy cập trực tiếp DB của MISA → an toàn khi MISA đổi/nâng cấp.
+**Consequences:** Đồng bộ kế toán qua MISA API + lưu `misa_voucher_id`/`misa_ref` trong các bảng tài chính để đối chiếu. Chấp nhận eventual consistency cho dữ liệu đã push lên MISA.
 
 ### ADR-05: Async job queue cho onboarding chain
 **Status:** Accepted
-**Context:** Onboarding gồm ClassIn (CN server, latency 200-500ms, có thể timeout) + Zalo + Email + Odoo.
+**Context:** Onboarding gồm ClassIn (CN server, latency 200-500ms, có thể timeout) + Zalo + Email + MISA sync.
 **Decision:** Webhook trả 200 ngay (<100ms), xử lý chain bằng Hangfire background jobs với `ContinueJobWith`.
 **Rationale:**
 - SePay cần response nhanh, không chờ chuỗi external API.
-- Mỗi bước retry độc lập; bước fail không block bước khác (Odoo fire-and-forget).
+- Mỗi bước retry độc lập; bước fail không block bước khác (MISA sync fire-and-forget).
 - Dead-letter + alert khi fail sau retry.
 **Consequences:** Cần idempotency vì job có thể chạy lại. Trạng thái theo dõi qua `hsa_enrollments`.
 
@@ -209,7 +208,7 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
 **Status:** Accepted
 **Decision:**
 - **Inbound** (SePay/ClassIn gửi tới ta): lưu raw ngay khi nhận (`hsa_webhook_log`), trả 200 nếu parse OK; nếu ta lỗi nội bộ → trả 5xx để nguồn retry (ClassIn tự retry). SePay miss → `SePayReconcileJob` cron mỗi 5 phút đối chiếu SePay API.
-- **Outbound** (ta gọi ClassIn/Zalo/Odoo): Hangfire `[AutomaticRetry(Attempts = 3)]` + Polly exponential backoff **1s / 5s / 30s**. Fail sau 3 → dead-letter (`status='FAILED'`) + alert.
+- **Outbound** (ta gọi ClassIn/Zalo/MISA): Hangfire `[AutomaticRetry(Attempts = 3)]` + Polly exponential backoff **1s / 5s / 30s**. Fail sau 3 → dead-letter (`status='FAILED'`) + alert.
 - Throttle outbound ClassIn ≤ **2 req/giây** (TR-08) khi bulk HCM.
 **Rationale:** Idempotency + retry + reconcile = không mất event, không nhân đôi.
 
@@ -247,8 +246,8 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
    │      fail → fallback Email; lưu hsa_zalo_log
    ▼ (9) ContinueWith → Email guide (job 3): hướng dẫn đầy đủ + invoke link
    │
-   ▼ (10) Fire-and-forget → Odoo (job 4): create res.partner (student) + sale.order + project.task (QLL)
-   │       lưu odoo_partner_id
+   ▼ (10) Fire-and-forget: ghi student + đơn hàng + QLL task vào PostgreSQL HSA; push journal entry → MISA SME (sync 1 chiều)
+   │       lưu misa_partner_ref
    ▼ (11) Nếu order.ref_code → Commission (job 5): insert hsa_commissions status='pending'
    │
    ▼ (12) Khi tất cả job critical xong → status='ONBOARDED', cập nhật order status (qua portal API)
@@ -267,7 +266,7 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
    │
    ├─ ATTENDANCE (20 phút sau buổi):
    │     parse → upsert hsa_classin_attendance (student_id, class_date, is_present)
-   │     Rule R1: COUNT(absent) ≥ 2 trong khóa? → create project.task (QLL) + Zalo ZNS phụ huynh
+   │     Rule R1: COUNT(absent) ≥ 2 trong khóa? → tạo task QLL (hsa_tasks) + Zalo ZNS phụ huynh
    │     Rule R2: không có login event 3 ngày? → Zalo ZNS hỏi thăm HS
    │
    ├─ LMS_SCORE (realtime):
@@ -280,7 +279,7 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
    └─ TEACHING_HOURS (từ attendance GV):
          aggregate giờ dạy/GV/tháng → buffer cho payroll (Flow F-06.2)
    │
-   ▼ (4) Cập nhật Odoo student record (qua JSON-RPC, fire-and-forget)
+   ▼ (4) Cập nhật student record trong PostgreSQL HSA (fire-and-forget)
 ```
 
 ### Flow C — Web Form → CRM Lead
@@ -293,10 +292,10 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
    │       trùng → 409 { duplicate_phone, existing_lead_id }
    ▼ (3) Tag: source, exam_type, ref_code
    ▼ (4) [Phase 2] Push to EZSale API (create/update lead) — chỉ create/update, KHÔNG write back business data ngược
-   ▼ (5) Push to Odoo crm.lead (mirror) → lưu odoo_lead_id
+   ▼ (5) Push to .NET CRM module (mirror) → lưu crm_lead_id
    ▼ (6) Auto-assign Sales Team theo exam_type (4 team: HSA/BCA/BQP/ĐGNL HCM)
    ▼ (7) Nếu HOT (rule: source ưu tiên / form đánh dấu) → Zalo OA notify Sale phụ trách
-   ▼ (8) 201 { lead_id, ezsale_lead_id?, odoo_lead_id? }
+   ▼ (8) 201 { lead_id, ezsale_lead_id?, crm_lead_id? }
 ```
 
 ---
@@ -313,7 +312,7 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
 **Effort:** ~22 dev-days.
 **Dependencies:** SePay webhook secret, ClassIn SID/SECRET + sandbox + course mapping, Zalo OA token + ZNS template duyệt.
 **Acceptance Criteria (Epic-level):**
-- AC1: 1 webhook SePay hợp lệ → trong < 2 phút HS có SBD, có `classin_uid`, nhận ZNS, có record Odoo + QLL task.
+- AC1: 1 webhook SePay hợp lệ → trong < 2 phút HS có SBD, có `classin_uid`, nhận ZNS, có record trong PostgreSQL HSA + QLL task.
 - AC2: Gửi 100 webhook trùng `transaction_id` đồng thời → đúng 1 SBD, 1 enroll.
 - AC3: ClassIn down → enrollment vào dead-letter + alert; tự retry khi up; không mất HS.
 - AC4: Dashboard hiển thị realtime: today_count, pending, failed.
@@ -325,8 +324,8 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
 | F-01.3 | ClassIn V1: register → addSchoolStudent → addCourseStudent (xử lý err 135) | 4d |
 | F-01.4 | Zalo OA ZNS gửi SBD + link (< 2 phút) | 2d |
 | F-01.5 | Email guide với ClassIn invoke link | 1d |
-| F-01.6 | Odoo student record creation (JSON-RPC) | 2d |
-| F-01.7 | QLL Task tự động trong Odoo Project | 1.5d |
+| F-01.6 | Ghi student record vào PostgreSQL HSA | 2d |
+| F-01.7 | QLL Task tự động trong .NET Platform | 1.5d |
 | F-01.8 | Retry + fallback khi ClassIn API fail (Polly + Hangfire) | 2d |
 | F-01.9 | Dead-letter queue + alert | 1.5d |
 | F-01.10 | Onboarding status dashboard (server-rendered HTML) | 2d |
@@ -370,21 +369,21 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
 | F-03.4 | Commission batch report (Excel/PDF) | 2.5d |
 | F-03.5 | CTV self-service xem hoa hồng | 3d |
 
-### EPIC-04: Odoo Foundation Setup
-**Mô tả:** Dựng Odoo Community làm warehouse + UI phụ.
+### EPIC-04: MISA SME + .NET Finance/CRM Foundation Setup
+**Mô tả:** Cấu hình MISA SME Online (kế toán) + dựng .NET Finance/CRM module trên PostgreSQL HSA.
 **Business value:** Nguồn sự thật duy nhất; báo cáo P&L; UI cho staff không cần build SPA.
-**Effort:** ~14 dev-days (gồm config Odoo + custom fields).
+**Effort:** ~14 dev-days (gồm cấu hình MISA sync + schema .NET Finance/CRM).
 **Dependencies:** Hạ tầng Docker/PostgreSQL.
 **Acceptance Criteria:**
-- AC1: Odoo chạy, 4 Sales Team theo kỳ thi, custom fields trên res.partner.
-- AC2: JSON-RPC create/update partner + task hoạt động từ middleware.
+- AC1: MISA SME sync hoạt động; .NET CRM có 4 Sales Team theo kỳ thi; schema student/finance trên PostgreSQL HSA.
+- AC2: Ghi/cập nhật student + task vào PostgreSQL HSA; MISA push voucher hoạt động.
 - AC3: 3 dashboard (COO/QLL/GV) hiển thị dữ liệu thật.
 
 | Feature | Mô tả | Effort |
 |---|---|---|
-| F-04.1 | Odoo Community install + PostgreSQL | 1d |
+| F-04.1 | MISA SME đăng ký + MisaSyncClient + PostgreSQL HSA schema | 1d |
 | F-04.2 | CRM config (4 Sales Teams) | 1.5d |
-| F-04.3 | Custom fields res.partner (student_sbd, exam_type, classin_uid...) | 2d |
+| F-04.3 | Schema hsa_students (student_sbd, exam_type, classin_uid...) + misa_partner_ref | 2d |
 | F-04.4 | Accounting + SePay reconciliation config | 3d |
 | F-04.5 | HR: 62 NS + GV + CTV records | 2d |
 | F-04.6 | Project: QLL task management | 1.5d |
@@ -393,33 +392,33 @@ SBD đã tạo `AND` đã enroll ClassIn (có `classin_uid`) `AND` đã gửi ZN
 ## SHOULD HAVE (Phase 2-3)
 
 ### EPIC-05: Lead Management Automation
-**Mô tả:** Web form → EZSale + Odoo mirror tự động, dedupe, nurture (N5, N6).
+**Mô tả:** Web form → EZSale + .NET CRM mirror tự động, dedupe, nurture (N5, N6).
 **Business value:** Loại bỏ nhập tay lead; phản hồi hot lead nhanh; nurture warm/cold.
 **Effort:** ~12 dev-days.
 **Dependencies:** EZSale API doc + credentials.
 **AC:** Web form không còn nhập tay; dedupe theo SĐT; hot lead → Sale ZNS < 5 phút.
 
-- F-05.1 Web form → EZSale auto-push · F-05.2 Web form → Odoo mirror · F-05.3 Dedup SĐT · F-05.4 Auto-assign team · F-05.5 Hot lead → Sale Zalo · F-05.6 Warm/Cold nurture · F-05.7 EZSale → Odoo sync (read EZSale, write Odoo)
+- F-05.1 Web form → EZSale auto-push · F-05.2 Web form → .NET CRM mirror · F-05.3 Dedup SĐT · F-05.4 Auto-assign team · F-05.5 Hot lead → Sale Zalo · F-05.6 Warm/Cold nurture · F-05.7 EZSale → .NET CRM sync (read EZSale, write .NET CRM)
 
 ### EPIC-06: Financial Automation
 **Mô tả:** Đối soát SePay tự động, timesheet GV → payslip, P&L realtime (N9, N10, N11).
 **Effort:** ~11 dev-days. **Dependencies:** EPIC-02 (teaching hours), EPIC-04 (Accounting).
 **AC:** Đối soát < 10 phút/ngày; payslip draft tự sinh; P&L theo kỳ thi × cơ sở (analytic).
 
-- F-06.1 SePay auto-reconciliation với Odoo Invoice · F-06.2 GV timesheet từ ClassIn → Odoo Payslip draft · F-06.3 P&L realtime (analytic dimensions)
+- F-06.1 SePay auto-reconciliation trong .NET Finance Service → push hóa đơn lên MISA SME · F-06.2 GV timesheet từ ClassIn → .NET Finance Service payslip draft (push lên MISA SME) · F-06.3 P&L realtime (analytic dimensions)
 
 ### EPIC-07: Student Care Automation
 **Mô tả:** Chuỗi pre-exam, NPS, at-risk, helpdesk (N12).
 **Effort:** ~12 dev-days. **Dependencies:** EPIC-02, Zalo templates.
-**AC:** Chuỗi D-30/D-7/D-3/D-1 chạy đúng lịch; NPS gửi sau kỳ thi; ticket từ Zalo/web vào Odoo.
+**AC:** Chuỗi D-30/D-7/D-3/D-1 chạy đúng lịch; NPS gửi sau kỳ thi; ticket từ Zalo/web vào .NET Platform.
 
-- F-07.1 Pre-exam sequences (D-30/7/3/1) · F-07.2 NPS survey · F-07.3 At-risk dashboard · F-07.4 Helpdesk ticket → Odoo
+- F-07.1 Pre-exam sequences (D-30/7/3/1) · F-07.2 NPS survey · F-07.3 At-risk dashboard · F-07.4 Helpdesk ticket → .NET Platform
 
 ## COULD HAVE (Phase 3+)
 
-### EPIC-08: EZSale Migration → Odoo CRM
+### EPIC-08: EZSale Migration → .NET CRM module
 **Effort:** ~15 dev-days. **Dependencies:** EPIC-04, EPIC-05 ổn định.
-- F-08.1 Full EZSale export + Odoo import · F-08.2 Meta Lead Ads → Odoo Social · F-08.3 CTV link tracking trong Odoo · F-08.4 Sale Manager QA dashboard
+- F-08.1 Full EZSale export + .NET CRM import · F-08.2 Meta Lead Ads → .NET CRM (lead capture) · F-08.3 CTV link tracking trong .NET CRM · F-08.4 Sale Manager QA dashboard
 
 ### EPIC-09: COO / Leadership Ops
 **Effort:** ~8 dev-days.
@@ -580,43 +579,43 @@ DoD: + render template với data thật, kiểm tra link đúng.
 Story Points: 2 · Priority: Must
 
 ---
-**US-01.11: Tạo student record trong Odoo**
+**US-01.11: Tạo student record trong PostgreSQL HSA**
 As a COO/QLL
-I want to mỗi HS onboard có `res.partner` trong Odoo với custom fields
-So that Odoo là warehouse tra cứu/báo cáo
+I want to mỗi HS onboard có record `hsa_students` trong PostgreSQL HSA với đầy đủ trường
+So that PostgreSQL HSA là SSOT tra cứu/báo cáo
 
 AC:
-- AC1: JSON-RPC tạo res.partner với student_sbd, exam_type, classin_uid, cohort, branch.
-- AC2: Lưu `odoo_partner_id` về `hsa_students` để map.
-- AC3: Fire-and-forget — Odoo fail KHÔNG block onboarding chain.
+- AC1: Insert/upsert `hsa_students` với student_sbd, exam_type, classin_uid, cohort, branch.
+- AC2: Record là nguồn sự thật; không cần map sang DB ngoài.
+- AC3: Nằm trong transaction onboarding (critical path).
 
-DoD: + integration test Odoo dev (Docker).
+DoD: + integration test PostgreSQL (Testcontainers).
 Story Points: 3 · Priority: Must
 
 ---
-**US-01.12: Tự tạo QLL Task trong Odoo Project**
+**US-01.12: Tự tạo QLL Task trong .NET Platform**
 As a QLL
 I want to mỗi HS mới sinh 1 task "Chào mừng & thêm vào group Zalo lớp" gán QLL phụ trách
 So that QLL không quên bước thủ công (N3, N4)
 
 AC:
-- AC1: Tạo `project.task` trong project theo lớp, assignee = `qll_user_id` từ course_mapping.
+- AC1: Tạo task (bảng `hsa_tasks`) theo lớp, assignee = `qll_user_id` từ course_mapping.
 - AC2: Task chứa SBD, tên HS, SĐT, link Zalo group.
 - AC3: Fire-and-forget.
 
-DoD: + integration test tạo task Odoo.
+DoD: + integration test tạo task.
 Story Points: 3 · Priority: Must
 
 ---
-**US-01.13: Tạo Sales Order trong Odoo**
+**US-01.13: Ghi đơn hàng + push doanh thu lên MISA SME**
 As a accounting
-I want to mỗi thanh toán tạo `sale.order`/invoice tương ứng trong Odoo
-So that doanh thu vào warehouse phục vụ P&L
+I want to mỗi thanh toán ghi đơn hàng vào PostgreSQL HSA và push journal entry tương ứng lên MISA SME Online
+So that doanh thu vào kế toán chính thức phục vụ P&L
 
 AC:
-- AC1: Tạo sale.order với partner = student, amount, product = khóa học, ref = order_reference.
+- AC1: Ghi đơn hàng `hsa_orders` (partner = student, amount, product = khóa học, ref = order_reference); .NET Finance Service push voucher lên MISA qua MISA API.
 - AC2: Gắn analytic (exam_type × branch) cho P&L sau này.
-- AC3: Idempotent theo order_reference.
+- AC3: Idempotent theo order_reference; lưu `misa_voucher_id` để đối chiếu.
 
 DoD: + integration test.
 Story Points: 3 · Priority: Must
@@ -624,12 +623,12 @@ Story Points: 3 · Priority: Must
 ---
 **US-01.14: Orchestrate chuỗi onboarding bằng Hangfire**
 As a hệ thống
-I want to chuỗi SBD → ClassIn → Zalo → Email → Odoo → Commission chạy theo `ContinueJobWith`
+I want to chuỗi SBD → ClassIn → Zalo → Email → MISA sync → Commission chạy theo `ContinueJobWith`
 So that mỗi bước retry độc lập, bước fail không chặn bước khác
 
 AC:
 - AC1: ClassIn job xong → ContinueWith Zalo + Email.
-- AC2: Odoo + Commission là Enqueue độc lập (fire-and-forget).
+- AC2: MISA sync + Commission là Enqueue độc lập (fire-and-forget).
 - AC3: Khi mọi critical job xong → `status='ONBOARDED'`, cập nhật order status.
 
 DoD: + E2E test với ngrok + SePay test mode.
@@ -643,7 +642,7 @@ So that giám sát & xử lý exception kịp thời
 
 AC:
 - AC1: Hiển thị today_count, pending_count, failed_count.
-- AC2: Bảng HS gần đây + trạng thái từng bước (SBD/ClassIn/Zalo/Odoo).
+- AC2: Bảng HS gần đây + trạng thái từng bước (SBD/ClassIn/Zalo/MISA).
 - AC3: Nút "retry" cho enrollment failed (gọi lại job).
 
 DoD: + server-rendered HTML, auto refresh 30s; auth Bearer (QLL/Admin).
@@ -686,7 +685,7 @@ I want to khi HS vắng buổi thứ 2 trong khóa → tạo task + ZNS phụ hu
 So that can thiệp sớm, giảm bỏ học (N7)
 
 AC:
-- AC1: `COUNT(is_present=false)` trong khóa ≥ 2 → tạo `project.task` QLL + ZNS group phụ huynh.
+- AC1: `COUNT(is_present=false)` trong khóa ≥ 2 → tạo task QLL (`hsa_tasks`) + ZNS group phụ huynh.
 - AC2: Mỗi ngưỡng chỉ trigger 1 lần (không spam mỗi buổi vắng tiếp theo dùng lại đúng ngưỡng).
 - AC3: Trong < 1h sau khi nhận attendance.
 
@@ -743,21 +742,21 @@ So that làm dữ liệu payroll (N9)
 
 AC:
 - AC1: Aggregate theo (gv_uid, month) → tổng giờ dạy.
-- AC2: Lưu buffer để EPIC-06 đẩy sang Odoo Payslip draft.
+- AC2: Lưu buffer để EPIC-06 đẩy sang .NET Finance Service payslip draft (push lên MISA SME).
 - AC3: Re-run cùng tháng → ghi đè đúng (không cộng dồn trùng).
 
 DoD: + test aggregate.
 Story Points: 5 · Priority: Should
 
 ---
-**US-02.8: Cập nhật student record Odoo từ data học tập**
+**US-02.8: Cập nhật student record (PostgreSQL HSA) từ data học tập**
 As a QLL
-I want to attendance/score cập nhật vào Odoo student record
+I want to attendance/score cập nhật vào student record (PostgreSQL HSA)
 So that warehouse phản ánh tình hình học tập
 
 AC:
-- AC1: JSON-RPC update custom fields (attendance_rate, avg_score) trên res.partner.
-- AC2: Fire-and-forget; Odoo fail không chặn pipeline.
+- AC1: Update trường (attendance_rate, avg_score) trên `hsa_students` (PostgreSQL HSA).
+- AC2: Cập nhật trực tiếp PostgreSQL HSA (không phụ thuộc hệ ngoài).
 - AC3: Batch để tránh quá nhiều RPC (cập nhật theo lô).
 
 DoD: + integration test.
@@ -800,7 +799,7 @@ Story Points: 3 · Priority: Should
 ```
 Backend:     .NET 8 / ASP.NET Core Web API
 ORM:         Entity Framework Core 8 (Code-First) — DB hsa_integration
-Database:    PostgreSQL 16 (instance dùng chung; DB riêng cho integration vs Odoo — ADR-04)
+Database:    PostgreSQL 16 (hsa_platform — DB DUY NHẤT, SSOT; MISA SME external accounting — ADR-04)
 Mediator:    MediatR (command/handler trong Application layer)
 Job Queue:   Hangfire (PostgreSQL storage, dashboard /hangfire)
 Resilience:  Polly (retry/backoff/circuit-breaker cho outbound)
@@ -818,7 +817,7 @@ Secrets:     Environment variables (.env, không commit) — không hardcode
 ```
 HSA.Integration/
 ├── HSA.Integration.sln
-├── docker-compose.yml            # postgres, redis(optional), seq, app, odoo
+├── docker-compose.yml            # postgres, redis(optional), seq, app
 ├── .env.example
 ├── src/
 │   ├── HSA.Api/                          # ASP.NET Core Web API (entry point)
@@ -850,7 +849,7 @@ HSA.Integration/
 │   │   │   ├── IClassInV1Client.cs
 │   │   │   ├── IClassInV2Client.cs
 │   │   │   ├── IZaloOAClient.cs
-│   │   │   ├── IOdooClient.cs
+│   │   │   ├── IMisaSyncClient.cs
 │   │   │   ├── ISePayWebhookValidator.cs
 │   │   │   └── IEZSaleClient.cs
 │   │   └── DependencyInjection.cs
@@ -875,7 +874,7 @@ HSA.Integration/
 │   │   ├── ClassIn/ (ClassInV1Client, ClassInV2Client, ClassInWebhookParser, ClassInSignature)
 │   │   ├── SePay/ (SePayWebhookValidator)
 │   │   ├── ZaloOA/ (ZaloOAClient, ZaloTokenStore)
-│   │   ├── Odoo/ (OdooJsonRpcClient)
+│   │   ├── Misa/ (MisaSyncClient — REST API, sync 1 chiều)
 │   │   ├── EZSale/ (EZSaleClient — read-only)
 │   │   ├── Email/ (EmailSender)
 │   │   ├── Persistence/
@@ -888,7 +887,7 @@ HSA.Integration/
 │       ├── ClassInEnrollJob.cs
 │       ├── ZaloNotifyJob.cs
 │       ├── EmailJob.cs
-│       ├── OdooSyncJob.cs
+│       ├── MisaSyncJob.cs
 │       ├── CommissionJob.cs
 │       ├── OnboardingRetryJob.cs
 │       ├── CommissionBatchJob.cs
@@ -909,7 +908,7 @@ HSA.Integration/
 -- ============================================================
 CREATE TYPE onboarding_status AS ENUM
     ('PENDING','SBD_GENERATED','CLASSIN_FAILED','CLASSIN_DONE',
-     'NOTIFIED','ODOO_SYNCED','ONBOARDED','FAILED');
+     'NOTIFIED','MISA_SYNCED','ONBOARDED','FAILED');
 
 CREATE TYPE commission_status AS ENUM ('pending','confirmed','paid','cancelled');
 
@@ -926,7 +925,7 @@ CREATE TABLE hsa_course_mappings (
     branch              VARCHAR(8)   NOT NULL,  -- HN / HCM
     classin_course_id   BIGINT       NOT NULL,
     classin_gv_uid      BIGINT,
-    qll_user_id         BIGINT,                 -- assignee QLL (Odoo res.users id)
+    qll_user_id         BIGINT,                 -- assignee QLL (hsa_users id)
     active              BOOLEAN      NOT NULL DEFAULT TRUE,
     created_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
     CONSTRAINT uq_course_code UNIQUE (hsa_course_code)
@@ -947,7 +946,7 @@ CREATE TABLE hsa_sbd_sequences (
 COMMENT ON TABLE hsa_sbd_sequences IS 'Sinh SBD an toàn concurrency bằng SELECT ... FOR UPDATE';
 
 -- ============================================================
--- hsa_students : học sinh (nguồn middleware; map sang Odoo qua odoo_partner_id)
+-- hsa_students : học sinh (SSOT trong PostgreSQL HSA; misa_partner_ref để đối chiếu kế toán)
 -- ============================================================
 CREATE TABLE hsa_students (
     student_id          BIGSERIAL PRIMARY KEY,
@@ -964,7 +963,7 @@ CREATE TABLE hsa_students (
     onboarding_status   onboarding_status NOT NULL DEFAULT 'PENDING',
     zalo_phone          VARCHAR(20),
     ref_code            VARCHAR(32),                -- CTV attribution
-    odoo_partner_id     INT,
+    misa_partner_ref    VARCHAR(64),
     created_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
     CONSTRAINT uq_students_sbd UNIQUE (sbd)
@@ -988,7 +987,7 @@ CREATE TABLE hsa_enrollments (
     classin_enrolled_at   TIMESTAMPTZ,
     zalo_sent_at          TIMESTAMPTZ,
     email_sent_at         TIMESTAMPTZ,
-    odoo_created_at       TIMESTAMPTZ,
+    misa_synced_at        TIMESTAMPTZ,
     status                onboarding_status NOT NULL DEFAULT 'PENDING',
     error_log             TEXT,
     retry_count           INT          NOT NULL DEFAULT 0,
@@ -1127,7 +1126,7 @@ POST /api/leads
   Description: Web form submit → tạo lead
   Auth:    API Key (header X-Api-Key)
   Body:    { full_name, phone, email, exam_type, branch, source, ref_code?, notes? }
-  201:     { lead_id, ezsale_lead_id?, odoo_lead_id? }
+  201:     { lead_id, ezsale_lead_id?, crm_lead_id? }
   409:     { error: "duplicate_phone", existing_lead_id }
 
 GET /api/students/{sbd}
@@ -1154,7 +1153,7 @@ POST /api/commissions/batch/{year}/{month}/confirm
 
 GET /health
   Description: Health check DB + external APIs
-  200:     { status:"healthy", db:"up", classin:"up|degraded", zalo:"up", odoo:"up" }
+  200:     { status:"healthy", db:"up", classin:"up|degraded", zalo:"up", misa:"up" }
 ```
 
 ## 5.5 Integration Adapter Specifications
@@ -1199,15 +1198,15 @@ public interface IZaloOAClient
     Task<string> RefreshTokenAsync(CancellationToken ct = default);
 }
 
-// ===== Odoo Adapter (JSON-RPC tại /web/dataset/call_kw) =====
-public interface IOdooClient
+// ===== MISA SME Adapter (REST API — sync 1 chiều .NET → MISA, kế toán chính thức) =====
+// Lưu ý: partner/lead/task nằm trong PostgreSQL HSA (SSOT). MISA chỉ nhận chứng từ kế toán.
+public interface IMisaSyncClient
 {
-    Task<int> CreatePartnerAsync(OdooPartner partner, CancellationToken ct = default);     // res.partner
-    Task<int> CreateLeadAsync(OdooLead lead, CancellationToken ct = default);              // crm.lead
-    Task<int> CreateSalesOrderAsync(OdooSalesOrder order, CancellationToken ct = default); // sale.order
-    Task<int> CreateProjectTaskAsync(OdooTask task, CancellationToken ct = default);       // project.task
-    Task UpdatePartnerAsync(int id, Dictionary<string,object> values, CancellationToken ct = default);
-    Task<List<T>> SearchReadAsync<T>(string model, List<object> domain, List<string> fields, CancellationToken ct = default);
+    Task<string> PushSalesInvoiceAsync(MisaSalesInvoice invoice, CancellationToken ct = default); // hóa đơn bán
+    Task<string> PushPayslipVoucherAsync(MisaPayslipVoucher voucher, CancellationToken ct = default); // chứng từ thù lao GV
+    Task<string> PushCommissionVoucherAsync(MisaCommissionVoucher voucher, CancellationToken ct = default); // chứng từ hoa hồng CTV
+    Task<string> PushJournalEntryAsync(MisaJournalEntry entry, CancellationToken ct = default); // bút toán tổng quát
+    Task<MisaSyncStatus> GetVoucherStatusAsync(string misaVoucherId, CancellationToken ct = default);
 }
 
 // ===== EZSale Adapter (READ-ONLY — KHÔNG write business data ngược EZSale) =====
@@ -1224,14 +1223,14 @@ public interface IEZSaleClient
 - **ClassIn V1**: tính `safeKey = MD5(SECRET + timeStamp)` (hex lowercase). Gửi form-urlencoded body. Khi nhận errno 135 → đọc UID trong response, set `AlreadyExisted=true`, KHÔNG throw.
 - **ClassIn throttle**: dùng `SemaphoreSlim` hoặc Polly RateLimit ≤ 2 req/s khi bulk (TR-08).
 - **Zalo**: `ZaloTokenStore` lưu access/refresh token vào DB; refresh khi nhận lỗi token; cron refresh phòng ngừa.
-- **Odoo**: authenticate qua `/web/session/authenticate` lấy session cookie, hoặc `common.login` lấy uid; cache uid; mọi lỗi RPC → log + fail-soft (fire-and-forget cho non-critical).
+- **MISA SME**: authenticate qua MISA OAuth/API key lấy access token; cache token + refresh; push chứng từ theo batch định kỳ; mọi lỗi → log + retry + fail-soft (sync 1 chiều, non-blocking cho onboarding).
 - **EZSale**: bọc trong adapter mỏng để dễ thay khi API đổi (TR-06).
 
 ---
 
 # PHẦN 6 — PHASED RELEASE PLAN
 
-## PHASE 0 — Foundation & Quick Wins (Tuần 1-3, không cần Odoo)
+## PHASE 0 — Foundation & Quick Wins (Tuần 1-3, không cần MISA/Finance)
 
 **Sprint 0 (Tuần 1): Setup & Baseline**
 - [ ] Khởi tạo .NET solution theo structure 5.2
@@ -1261,7 +1260,7 @@ public interface IEZSaleClient
 
 **Sprint 3 (Tuần 4): SePay → Onboarding Chain**
 - [ ] SePay webhook → ProcessPaymentHandler
-- [ ] Full chain: SBD → ClassIn → Zalo → Email → Odoo (Hangfire ContinueWith)
+- [ ] Full chain: SBD → ClassIn → Zalo → Email → MISA sync (Hangfire ContinueWith)
 - [ ] Idempotency (duplicate transaction)
 - [ ] Dead-letter cho failed jobs
 - [ ] Onboarding status tracking
@@ -1273,9 +1272,9 @@ public interface IEZSaleClient
 - [ ] Fallback Zalo fail → Email
 - [ ] Log mọi gửi vào hsa_zalo_log
 
-**Sprint 5 (Tuần 6): Odoo Integration & Dashboard**
-- [ ] Cài Odoo Community + modules cơ bản
-- [ ] OdooJsonRpcClient authenticate + call
+**Sprint 5 (Tuần 6): MISA Sync + .NET Finance & Dashboard**
+- [ ] Đăng ký MISA SME Online + cấu hình MISA API
+- [ ] MisaSyncClient authenticate + push test
 - [ ] Create student record + QLL task khi onboarding
 - [ ] Dashboard /dashboard/onboarding (HTML + ít JS)
 
@@ -1290,7 +1289,7 @@ public interface IEZSaleClient
 **Sprint 8 (Tuần 9): LMS Score + Teaching Hours**
 - [ ] Parse score webhook
 - [ ] Rule completion < 50% → ZNS tài liệu
-- [ ] Teaching hours aggregation/GV/tháng → export Odoo
+- [ ] Teaching hours aggregation/GV/tháng → .NET Finance Service → push MISA SME
 
 **Sprint 9 (Tuần 10): CTV Attribution**
 - [ ] ref_code injection vào web form URLs
@@ -1298,14 +1297,14 @@ public interface IEZSaleClient
 - [ ] Commission calc engine
 - [ ] Commission batch report (Excel/PDF)
 
-## PHASE 3 — Odoo CRM Migration (Tuần 11-14, tùy chọn)
+## PHASE 3 — .NET CRM Migration (Tuần 11-14, tùy chọn)
 
 **Sprint 10-11: Lead Management**
-- [ ] Web form → EZSale (giữ) + Odoo CRM (mirror)
-- [ ] EZSale read adapter sync sang Odoo
-- [ ] Nurture sequences trong Odoo
+- [ ] Web form → EZSale (giữ) + .NET CRM module (mirror)
+- [ ] EZSale read adapter sync sang .NET CRM module
+- [ ] Nurture sequences trong .NET / Hangfire
 
-**Sprint 12-13: Full Odoo Foundation**
+**Sprint 12-13: Full .NET CRM Foundation**
 - [ ] Accounting: SePay reconciliation
 - [ ] HR: toàn bộ nhân sự
 - [ ] 3 dashboards hoàn chỉnh
@@ -1332,7 +1331,7 @@ public interface IEZSaleClient
 - ClassIn webhook: validate SID.
 - API endpoints: Bearer token hoặc API Key.
 - KHÔNG log sensitive: SĐT full → mask `0901***456`; số tài khoản ngân hàng → không log.
-- Odoo: role-based, least privilege (tài khoản API riêng, không dùng admin).
+- MISA SME: role-based, least privilege (tài khoản API riêng, không dùng admin).
 - Secrets: env vars / Key Vault, không hardcode, không commit.
 
 ## 7.4 Observability
@@ -1360,7 +1359,7 @@ public interface IEZSaleClient
 | TR-04 | SePay webhook miss (HSA server down) | Thấp | Cao | hsa_webhook_log + SePayReconcileJob cron 5 phút đối chiếu API |
 | TR-05 | SBD duplicate khi concurrent payment | Thấp | Cao | PostgreSQL row-lock (FOR UPDATE) + UNIQUE constraint + idempotency key |
 | TR-06 | EZSale API đổi/deprecated | Trung bình | Thấp | Adapter read-only mỏng, dễ thay |
-| TR-07 | Odoo upgrade phá custom code | Thấp | Trung bình | Tối thiểu custom module; chủ yếu JSON-RPC; DB tách riêng (ADR-04) |
+| TR-07 | MISA API đổi/lock-in | Thấp | Trung bình | Sync 1 chiều qua MISA API (business-level); PostgreSQL HSA là SSOT — thay phần mềm kế toán không mất dữ liệu lõi (ADR-04) |
 | TR-08 | ClassIn rate limit khi bulk enroll (1.300 HS/đợt HCM) | Trung bình | Cao | Queue-based, throttle ≤ 2 req/s, test trước go-live HCM |
 
 ---
@@ -1369,10 +1368,10 @@ public interface IEZSaleClient
 
 **Infrastructure (ngày 1-2):**
 - [ ] Cài Docker Desktop (postgres + seq + optional redis)
-- [ ] docker-compose.yml: postgres, seq, app, (odoo dev)
+- [ ] docker-compose.yml: postgres, seq, app
 - [ ] GitHub repo: hsa-integration
 - [ ] .NET 8 solution theo structure 5.2
-- [ ] Odoo 17 Community (Docker) cho dev
+- [ ] MISA SME Online sandbox/API key cho dev
 
 **Credentials & API Setup (ngày 2-3) — KHÔNG CODE, chỉ thu thập:**
 - [ ] ClassIn: SID + SECRET từ management console
@@ -1477,8 +1476,8 @@ public async Task Handle(ProcessPaymentCommand cmd, CancellationToken ct)
     BackgroundJob.ContinueJobWith<EmailJob>(classInJobId, j =>
         j.SendOnboardingGuideAsync(enrollment.Id, order.StudentEmail, sbd));
 
-    // 6. Odoo (fire-and-forget, NON-critical path)
-    BackgroundJob.Enqueue<OdooSyncJob>(j => j.CreateStudentAsync(enrollment.Id, sbd));
+    // 6. MISA sync (fire-and-forget, NON-critical path)
+    BackgroundJob.Enqueue<MisaSyncJob>(j => j.PushEnrollmentVoucherAsync(enrollment.Id, sbd));
 
     // 7. CTV commission
     if (!string.IsNullOrEmpty(order.RefCode))
@@ -1506,11 +1505,11 @@ ZALO_REFRESH_TOKEN=your_refresh_token
 ZALO_APP_ID=your_app_id
 ZALO_APP_SECRET=your_app_secret
 
-# Odoo
-ODOO_BASE_URL=http://localhost:8069
-ODOO_DB=hsa_odoo
-ODOO_USERNAME=api_user            # tài khoản riêng, least privilege (KHÔNG dùng admin)
-ODOO_PASSWORD=your_odoo_password
+# MISA SME Online (kế toán chính thức — sync 1 chiều .NET → MISA)
+MISA_API_BASE_URL=https://api.misa.vn
+MISA_APP_ID=your_misa_app_id
+MISA_API_KEY=your_misa_api_key       # tài khoản riêng, least privilege (KHÔNG dùng admin)
+MISA_COMPANY_CODE=your_company_code
 
 # EZSale (read-only)
 EZSALE_API_KEY=your_ezsale_key

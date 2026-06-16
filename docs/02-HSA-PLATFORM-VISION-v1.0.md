@@ -12,7 +12,7 @@
 | **Người soạn** | COO — Product Owner |
 | **Đối tượng đọc** | BGĐ (phê duyệt định hướng) + CTO (căn cứ thiết kế) |
 | **Trạng thái** | Draft for Approval |
-| **Phạm vi** | Toàn bộ nền tảng web, 7 nhóm người dùng, kiến trúc tích hợp .NET 10 + Odoo + ClassIn |
+| **Phạm vi** | Toàn bộ nền tảng web, 7 nhóm người dùng, kiến trúc tích hợp .NET 10 + MISA SME Online + ClassIn |
 
 ---
 
@@ -43,10 +43,10 @@ Hệ quả: dữ liệu phân mảnh, thao tác tay nhiều, không có nguồn 
 | Hành động | Đối tượng |
 |---|---|
 | **BUILD (tự xây)** | 7 portal web, mock exam engine, learning module, business logic nghiệp vụ HSA (SBD, onboarding chain, CTV attribution). |
-| **INTEGRATE (tích hợp, KHÔNG xây lại)** | ClassIn (live class), Odoo Community (ERP/kế toán), SePay (thanh toán), EZSale (CRM giai đoạn đầu), Zalo OA + Email, VNPT/Viettel (e-invoice). |
+| **INTEGRATE (tích hợp, KHÔNG xây lại)** | ClassIn (live class), MISA SME Online (kế toán chính thức), SePay (thanh toán), EZSale (CRM giai đoạn đầu), Zalo OA + Email, VNPT/Viettel (e-invoice). |
 | **REPLACE (thay thế dần)** | Google Sheet → migrate vào platform; Google Drive rời rạc → file storage (DO Spaces/S3). |
 
-**Triết lý:** Không phát minh lại những gì SaaS đã làm tốt (live class, payment, ERP core). Tập trung nguồn lực kỹ thuật vào **"chất keo" và nghiệp vụ đặc thù** mà không sản phẩm nào trên thị trường phủ được.
+**Triết lý:** Không phát minh lại những gì SaaS đã làm tốt (live class, payment, kế toán chuẩn pháp lý VN). Tập trung nguồn lực kỹ thuật vào **"chất keo" và nghiệp vụ đặc thù** (CRM, hoa hồng, thù lao, đối soát, onboarding) mà không sản phẩm nào trên thị trường phủ được.
 
 ---
 
@@ -179,9 +179,10 @@ Ký hiệu: ✅ có quyền/sử dụng · ❌ không · 🔜 giai đoạn sau.
 | **Actor portals (web)** | **BUILD** (Next.js) | Đặc thù nghiệp vụ HSA, không SaaS nào phủ đủ 7 vai trò. |
 | **Mock exam engine** | **BUILD** | Cần kiểm soát câu hỏi, kết quả, chống gian lận, phân tích điểm yếu. |
 | **Online classroom (live)** | **INTEGRATE** ClassIn | Đã có hợp đồng, HS quen; lấy data về qua Data Subscription. |
-| **Accounting / ERP** | **INTEGRATE** Odoo Community | Free, mạnh, kết nối JSON-RPC. |
+| **Kế toán chính thức** | **INTEGRATE** MISA SME Online | Chuẩn kế toán VN, kế toán HSA đã quen, có REST API; nhận sync 1 chiều từ .NET. |
+| **Nghiệp vụ tài chính đặc thù** | **BUILD** .NET Finance Service | Hoa hồng CTV, thù lao GV, đối soát SePay, mã khuyến mãi — push journal entries lên MISA. |
 | **Payment gateway** | **INTEGRATE** SePay | Đang dùng, webhook ổn định. |
-| **CRM (giai đoạn đầu)** | **INTEGRATE** EZSale | Không gián đoạn đội Sale; migrate sang Odoo CRM sau. |
+| **CRM (giai đoạn đầu)** | **INTEGRATE** EZSale | Không gián đoạn đội Sale; migrate sang .NET CRM module sau. |
 | **Communication** | **INTEGRATE** Zalo OA + Email | Không tự xây messaging. |
 | **E-invoice** | **INTEGRATE** VNPT/Viettel | Bắt buộc pháp lý, API có sẵn. |
 | **Google Sheet** | **REPLACE** dần | Migrate vào platform sau khi ổn định. |
@@ -218,10 +219,10 @@ Ký hiệu: ✅ có quyền/sử dụng · ❌ không · 🔜 giai đoạn sau.
         └───────┬───────────────────────┬───────────────────────┬─────────┘
                 │                       │                       │
        ┌────────▼────────┐    ┌─────────▼─────────┐   ┌─────────▼──────────┐
-       │  Hangfire QUEUE │    │  PostgreSQL       │   │  Odoo Community    │
-       │  background job │    │  INTEGRATION DB   │   │  Finance + CRM     │
-       │  retry · cron   │    │  (HSA sở hữu —     │◄─►│  (JSON-RPC)         │
-       │  scheduling     │    │  KHÔNG phải Odoo)  │   │                    │
+       │  Hangfire QUEUE │    │  PostgreSQL       │   │  MISA SME Online   │
+       │  background job │    │  HSA PLATFORM DB  │   │  Kế toán chính thức│
+       │  retry · cron   │    │  (HSA sở hữu —     │──►│  MISA API (sync    │
+       │  scheduling     │    │  SSOT duy nhất)   │   │  1 chiều .NET→MISA)│
        └─────────────────┘    └───────────────────┘   └────────────────────┘
                                         │
         ┌───────────────────────────────┴────────────────────────────────────┐
@@ -232,58 +233,51 @@ Ký hiệu: ✅ có quyền/sử dụng · ❌ không · 🔜 giai đoạn sau.
 ```
 
 **Nguyên tắc kiến trúc:**
-- **PostgreSQL Integration DB** là nguồn sự thật do **HSA sở hữu** — KHÔNG dùng Odoo DB làm DB chính, tránh khóa cứng vào Odoo.
+- **PostgreSQL HSA Platform DB** là nguồn sự thật duy nhất (SSOT) do **HSA sở hữu** — chỉ có 1 database; **MISA SME** nhận dữ liệu kế toán qua sync định kỳ từ **.NET Finance Service**.
 - **.NET API Gateway** là "hệ thần kinh trung ương" — mọi luồng dữ liệu đi qua đây, không cho phép frontend gọi thẳng external service.
-- **Odoo** kết nối qua **JSON-RPC**; ClassIn/SePay/Zalo qua **webhook + REST**; tất cả bọc trong Domain Service tương ứng.
+- **MISA SME Online** nhận sync **1 chiều (.NET → MISA)** qua **MISA API** (push journal entries định kỳ); ClassIn/SePay/Zalo qua **webhook + REST**; tất cả bọc trong Domain Service tương ứng.
 - **Hangfire** xử lý onboarding chain, đối soát batch, tính hoa hồng/thù lao, đẩy ZNS với retry tự động.
 
 ---
-
-# 6. QUYẾT ĐỊNH: ERP + LMS
-
-> **HSA không mua ERP-LMS all-in-one.** Quyết định: dùng **Odoo Community** (miễn phí, self-host) làm ERP + giữ **ClassIn** làm lớp trực tuyến + tự xây **HSA Learning Module** (mock exam, ngân hàng câu hỏi, tiến trình) + kết nối tất cả qua **.NET Integration Platform**.
-
-| Lớp | Cấu thành | Chi phí license |
-|---|---|---|
-| **ERP** | Odoo Community (kế toán, CRM, nhân sự, báo cáo) | **0 đồng** |
-| **LMS — live class** | ClassIn (giữ nguyên) | License đang có |
-| **LMS — ôn luyện** | HSA Learning Module (tự xây, nằm trong platform) | Chi phí nhân sự CTO |
-| **Connector** | HSA Integration Platform (.NET) — kết nối toàn bộ | Chi phí nhân sự CTO |
 
 ---
 
 # 7. RESOURCE PLAN — CẦN BAO NHIÊU NGƯỜI ĐỂ XÂY?
 
-## 7.1 Thực tế với 1 CTO thuần backend
+## 7.1 Lưu ý quan trọng: CTO cần tuyển mới
 
-- **Có thể xây:** API, integrations, database, business logic, Odoo connector.
-- **KHÔNG thể xây một mình:** 7 portal web (UX/UI + frontend code) song song với tất cả integrations.
-- **Timeline nếu chỉ 1 người:** 36–48 tháng — **quá dài**, mất cơ hội mở rộng HCM/Đà Nẵng.
+> HSA hiện **chưa có CTO**. Toàn bộ lộ trình phụ thuộc vào việc tuyển được CTO phù hợp. Đây là **điều kiện tiên quyết** — không tuyển được CTO thì Phase 0 không thể khởi động. COO đóng vai Product Owner, KHÔNG đóng vai kỹ thuật.
 
-## 7.2 Team tối thiểu để hoàn thành trong 24 tháng
+## 7.2 Cấu hình team đề xuất
 
-| Vị trí | Hình thức | Mức chi phí | Nhiệm vụ chính |
+| Vị trí | Hình thức | Mức lương/chi phí | Nhiệm vụ chính |
 |---|---|---|---|
-| CTO / Backend Lead (.NET) | Fulltime nội bộ | **50–100 triệu/tháng** | API, business logic, integrations, database, Odoo |
-| Frontend Developer (Next.js) | **Freelancer theo phase** | Theo khối lượng/giai đoạn | Web portals cho tất cả 7 vai trò |
-| UI/UX Designer | Freelancer/part-time | Theo project | Design system, wireframes, mockups |
-| QA/Tester | Part-time hoặc CTO kiêm | Tùy | Test tự động + manual |
+| **CTO** (SA + Backend .NET) | Fulltime nội bộ — **tuyển mới** | **50–100 triệu/tháng** | Kiến trúc hệ thống, API, business logic, integrations, DB, MISA sync, dẫn dắt team |
+| **Fullstack Developer** (.NET + Next.js) | Fulltime nội bộ | **30–40 triệu/tháng** | Backend support + toàn bộ web portal (7 vai trò) |
+| **Fresher Developer** | Fulltime nội bộ | **15 triệu/tháng** | Task nhỏ, test, bug fix, hỗ trợ senior |
+| **UI/UX Designer** | Freelancer theo project | Theo deliverable | Design system, wireframes, mockups từng Phase |
+| **QC / Tester** | Freelancer theo sprint | Theo deliverable | Test manual + viết test case |
 
-> **Lưu ý Freelancer FE:** Phù hợp cho Phase 0–2 khi deliverable rõ ràng (từng portal). Rủi ro: thay người giữa project mất context. Giảm thiểu bằng cách: spec chi tiết trước khi thuê, handoff code có tài liệu, CTO review mọi PR.
+## 7.3 Chi phí nhân sự phát triển (tháng/năm)
 
-## 7.3 Tổng chi phí nhân sự phát triển
+| | Chi phí/tháng | Chi phí/năm |
+|---|---|---|
+| CTO | 50–100 triệu | 600–1.200 triệu |
+| Fullstack Dev | 30–40 triệu | 360–480 triệu |
+| Fresher | 15 triệu | 180 triệu |
+| UI/UX + QC (freelance) | ~10–20 triệu | ~120–240 triệu |
+| **Tổng nhân sự/năm** | **105–175 triệu/tháng** | **~1.260–2.100 triệu/năm** |
 
-- **Năm 1 (T8/2026 – T7/2027):** CTO (fulltime) + FE Freelancer (theo phase) + UI/UX (project-based) — **thấp hơn đáng kể so với 2 fulltime**, chỉ chi khi có deliverable.
-- **Năm 2 (T8/2027 – T7/2028):** CTO (fulltime) + FE Freelancer tiếp tục hoặc chuyển fulltime nếu khối lượng đủ lớn.
+> **Lưu ý:** Chi phí nhân sự tech cao hơn đáng kể so với các ước tính ban đầu. Đây là chi phí thực tế để có đội ngũ đủ năng lực. Cần đưa con số này vào ROI calculation đầy đủ.
 
 ## 7.4 So sánh với thuê agency
 
-| Phương án | Chi phí ước tính | Ghi chú |
-|---|---|---|
-| **Tự xây (CTO nội bộ + FE Freelancer)** | ~thấp hơn fulltime team | Làm chủ sản phẩm, linh hoạt chi theo phase |
-| **Thuê agency xây tương đương** | **2.000–5.000 triệu** | Quy mô platform này, chưa kể chi phí maintain |
+| Phương án | Chi phí xây dựng | Chi phí vận hành/năm | Ghi chú |
+|---|---|---|---|
+| **Tự xây (team nội bộ)** | ~1.260–2.100 triệu/năm nhân sự | ~200–300 triệu/năm (duy trì) | Làm chủ code, kiến thức ở lại |
+| **Thuê agency** | **2.000–5.000 triệu** (một lần) | ~300–600 triệu/năm (maintain) | Phụ thuộc vendor, black box |
 
-> **Kết luận:** Tự xây vẫn **rẻ hơn 10–20 lần** so với agency, đồng thời giữ được quyền sở hữu mã nguồn và năng lực kỹ thuật trong nội bộ.
+> **Kết luận:** Tự xây vẫn có lợi thế về **kiểm soát, sở hữu và linh hoạt** — nhưng chi phí nhân sự cần được hoạch định đầy đủ, không thể tính thấp.
 
 ---
 
@@ -313,7 +307,7 @@ Ký hiệu: ✅ có quyền/sử dụng · ❌ không · 🔜 giai đoạn sau.
 - Parent portal: xem con, điểm danh, alert, đăng ký anh em.
 - Mock exam engine: ngân hàng câu hỏi, đề thi thử timed, phân tích kết quả.
 - Finance module: kế toán thu/chi đầy đủ, thù lao GV tự động, e-invoice.
-- Odoo deep integration: dashboard BGĐ realtime.
+- MISA sync + .NET Finance module hoàn chỉnh: push journal entries lên MISA SME, dashboard BGĐ realtime từ PostgreSQL HSA.
 - Family CRM (**Flow D**): nhận diện gia đình, nurture sequence.
 - **KPI:** phụ huynh tự xem tiến trình, GV tự xem thù lao.
 
@@ -339,7 +333,7 @@ Ký hiệu: ✅ có quyền/sử dụng · ❌ không · 🔜 giai đoạn sau.
 | **0** | CTO+FE onboard, hạ tầng + CI/CD, design system, fix bảo mật B0–B7 | 100% lỗ hổng B0–B7 đóng; pipeline build xanh | T8–9/2026 |
 | **1** | Onboarding chain (Flow A) + Admin portal + Student portal cơ bản | Onboarding < 2 phút (P95); giảm ≥80% thao tác tay | T10–12/2026 |
 | **2** | Teacher + CTV + Sale portal; hoa hồng tự động (Flow C); chăm sóc vắng (Flow B) | Tranh chấp hoa hồng = 0; CTV self-service 100% | T1–4/2027 |
-| **3** | Parent portal + Mock exam engine + Finance module + Odoo realtime + Family CRM (Flow D) | PH tự xem tiến trình; GV tự xem thù lao; e-invoice tự động | T5–9/2027 |
+| **3** | Parent portal + Mock exam engine + Finance module + MISA sync realtime + Family CRM (Flow D) | PH tự xem tiến trình; GV tự xem thù lao; e-invoice tự động | T5–9/2027 |
 | **4** | BGĐ dashboard nâng cao + Đà Nẵng go-live | Đà Nẵng vận hành plug-and-play; BGĐ dashboard real-time đầy đủ | T10/2027–T3/2028 |
 | **5** | AI personalization + predictive drop-out + marketing automation | Gợi ý ôn luyện cá nhân hóa; cảnh báo drop-out có độ chính xác đo được | T4–9/2028 |
 
@@ -355,7 +349,7 @@ Ký hiệu: ✅ có quyền/sử dụng · ❌ không · 🔜 giai đoạn sau.
 | **R4** | **Data migration** từ Google Sheet, EZSale, Drive → lỗi dữ liệu | Trung bình–Cao | Migrate theo lô có đối soát; giữ bản gốc read-only; script idempotent + dry-run; validate trước khi cutover. |
 | **R5** | **Scope creep** — BGĐ liên tục thêm yêu cầu | Cao | COO làm Product Owner gác cổng backlog; mọi yêu cầu mới vào backlog, ưu tiên theo phase; "freeze scope" trong mỗi sprint. |
 | **R6** | **ClassIn API thay đổi** ảnh hưởng Learning module | Trung bình | Bọc ClassIn sau Learning Service (anti-corruption layer); không để frontend phụ thuộc trực tiếp; theo dõi changelog ClassIn; có fallback điểm danh tay. |
-| **R7** | **Odoo upgrade/lock-in** — phụ thuộc Odoo cho dữ liệu tài chính | Trung bình | PostgreSQL Integration DB là nguồn sự thật, KHÔNG phải Odoo DB; Odoo chỉ là module kế toán; có thể thay thế mà không mất dữ liệu lõi. |
+| **R7** | **MISA lock-in** — phụ thuộc MISA cho dữ liệu kế toán | Trung bình–Thấp | PostgreSQL HSA Platform là nguồn sự thật duy nhất, KHÔNG phải MISA DB; MISA chỉ nhận sync 1 chiều dữ liệu kế toán; có thể thay phần mềm kế toán mà không mất dữ liệu lõi. |
 | **R8** | **Quá tải khi scale ×2 (2026) / ×1.5 (2027)** | Trung bình | Hangfire queue + horizontal scaling; CDN cho static/media; load test trước mỗi mùa tuyển sinh cao điểm. |
 
 ---
@@ -374,7 +368,7 @@ Khi HSA Platform đi vào hoạt động, mỗi tương tác của học sinh, p
 - **Learning data (kết quả học tập):** điểm mock exam tách theo chủ đề/môn con (Toán, Văn, Khoa học, Tiếng Anh…), tiến bộ điểm số theo tuần, điểm yếu cố hữu theo dạng bài, độ ổn định điểm qua nhiều lần thi thử.
 - **Conversion data (chuyển đổi tuyển sinh):** nguồn lead (Zalo, Facebook, CTV, referral, walk-in), thời gian từ lead → chốt (lead time), số lần tương tác với Sale trước khi chốt, kênh nào có chi phí/chuyển đổi tốt nhất, tỉ lệ rơi ở từng bước phễu.
 - **CTV data (cộng tác viên):** conversion rate của từng CTV trong 132–137 CTV, loại nội dung CTV share hiệu quả nhất, thời điểm CTV active, referral chain (CTV nào giới thiệu CTV nào), độ bền hoạt động.
-- **Payment data (thanh toán — qua SePay/Odoo):** gói học bán chạy nhất theo mùa, tỉ lệ hoàn tiền theo gói, pattern thanh toán trả góp vs trả thẳng, độ trễ thanh toán, gói nào hay bị huỷ.
+- **Payment data (thanh toán — qua SePay/.NET Finance Service):** gói học bán chạy nhất theo mùa, tỉ lệ hoàn tiền theo gói, pattern thanh toán trả góp vs trả thẳng, độ trễ thanh toán, gói nào hay bị huỷ.
 - **Engagement data (tương tác Zalo OA):** tỉ lệ mở tin nhắn, tỉ lệ click link, tỉ lệ phản hồi; buổi học nào học sinh vắng nhiều nhất (qua điểm danh ClassIn), khung giờ phụ huynh phản hồi nhanh nhất.
 - **Family data (quan hệ gia đình):** gia đình nào có nhiều con em cùng học HSA, tỉ lệ siblings convert (anh/chị học rồi giới thiệu em), giá trị vòng đời theo hộ gia đình.
 
