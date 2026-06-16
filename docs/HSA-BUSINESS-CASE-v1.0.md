@@ -634,60 +634,283 @@ Hiện tại HSA thu thập tên + số điện thoại học sinh và **gần n
 
 # PHẦN 3 — ĐỀ XUẤT: CHÚNG TA XÂY GÌ?
 
-## 3.1 Tầm nhìn hệ thống mới
+> **Mục tiêu phần này:** không chỉ trả lời "xây cái gì", mà còn trả lời **"xây thế nào để không gây gián đoạn kinh doanh"** và **"vì sao tự xây thay vì mua/thuê"**. Phần này được viết hai tầng: phần diễn giải để BGĐ hiểu **WHAT** (cái gì, vì sao), phần kỹ thuật để CTO/technical lead hiểu **WHY** (vì sao thiết kế như vậy).
 
-> **HSA Integration Platform là "bộ não kết nối" đặt giữa 7 công cụ rời rạc hiện tại, để mọi việc từ lúc học sinh thanh toán đến lúc sẵn sàng vào lớp diễn ra tự động trong dưới 2 phút, 24/7 — và để toàn bộ dữ liệu vận hành dồn về MỘT nơi duy nhất phục vụ báo cáo.**
+## 3.1 Tầm nhìn & triết lý thiết kế
+
+### 3.1.1 Tầm nhìn 3 năm — ba nấc trưởng thành
+
+Đề xuất này không phải một dự án "làm xong rồi để đó". Nó là nền móng cho một lộ trình trưởng thành 3 năm, mỗi năm nâng một nấc giá trị:
 
 ```
-                    [ Học sinh thanh toán qua SePay ]
-                                  │
-                                  ▼  (tự động, không cần người)
-        ╔══════════════════════════════════════════════════╗
-        ║          HSA INTEGRATION PLATFORM                 ║
-        ║      "Tự động tối đa — Người xử lý ngoại lệ"       ║
-        ╚══════════════════════════════════════════════════╝
-            │           │            │             │
-            ▼           ▼            ▼             ▼
-      Tạo SBD     Kích hoạt    Gửi tin nhắn   Ghi vào kho
-      tự động     ClassIn      Zalo + email   dữ liệu Odoo
-                                                    │
-                                                    ▼
-                                       [ Dashboard cho BGĐ ]
+  NĂM 1 (2026–2027)        NĂM 2 (2027)            NĂM 3 (2028+)
+ ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+ │ TỰ ĐỘNG HÓA      │ →  │ NỀN TẢNG DỮ LIỆU │ →  │ TRẢI NGHIỆM      │
+ │ QUY TRÌNH        │    │                  │    │ CÁ NHÂN HÓA      │
+ ├──────────────────┤    ├──────────────────┤    ├──────────────────┤
+ │ Cắt 504h tay/    │    │ Một nguồn dữ liệu│    │ Chăm sóc chủ động│
+ │ tháng. Onboard   │    │ duy nhất. Dashboard│   │ từng HS & phụ    │
+ │ < 2 phút, 24/7.  │    │ realtime. Attribu-│   │ huynh. Family    │
+ │ Hết SPOF.        │    │ tion ROI marketing│   │ CRM. Up-sell tự  │
+ │                  │    │ & hoa hồng CTV.  │    │ động theo dữ liệu│
+ └──────────────────┘    └──────────────────┘    └──────────────────┘
+   "Hết chảy máu        "Nhìn rõ doanh         "Biến dữ liệu thành
+    nhân công"           nghiệp bằng số"        doanh thu mới"
 ```
 
-## 3.2 Nguyên tắc nền tảng: "Tự động tối đa — Con người xử lý ngoại lệ"
+- **Năm 1 — Tự động hóa quy trình:** chấm dứt 504 giờ tay/tháng, onboarding tự động dưới 2 phút, xóa các điểm lỗi đơn (R1, R3). Đây là phần **bắt buộc**, giải quyết các vấn đề đang chảy máu hôm nay.
+- **Năm 2 — Nền tảng dữ liệu:** mọi dữ liệu vận hành dồn về một nguồn duy nhất (Odoo). BGĐ có dashboard thời gian thực; marketing đo được ROI từng kênh; hoa hồng CTV minh bạch. HSA chuyển từ "điều hành mù" sang "điều hành bằng số".
+- **Năm 3 — Trải nghiệm cá nhân hóa:** khi đã có dữ liệu sạch và tập trung, HSA khai thác nó để chăm sóc chủ động (cảnh báo vắng học, giữ chân học sinh) và mở nguồn doanh thu mới từ tệp phụ huynh (P9 — doanh thu ẩn 3,2–10,8 tỷ/năm).
 
-Đây là triết lý cốt lõi của đề xuất:
+> **Đọc cho BGĐ:** đầu tư Giai đoạn 1 không chỉ tiết kiệm chi phí — nó **đặt nền móng** cho hai nấc giá trị sau. Mỗi đồng đầu tư vào Năm 1 mở khóa giá trị lớn hơn ở Năm 2 và Năm 3.
 
-- **Việc đúng quy trình (95% trường hợp)** → máy tự làm hết, không cần người chạm tay.
-- **Việc ngoại lệ (5%)** → hệ thống tự phát hiện, đẩy lên cho nhân viên xử lý đúng người, đúng lúc.
+### 3.1.2 Năm nguyên tắc thiết kế
 
-> Kết quả: nhân sự không còn "ngồi gõ" cho từng học sinh, mà chuyển sang **giám sát và xử lý các trường hợp đặc biệt** — công việc có giá trị cao hơn, ít sai sót hơn, không thể bị tắc vì một người nghỉ.
+Mọi quyết định kỹ thuật trong đề xuất này tuân theo 5 nguyên tắc. Đây là "hiến pháp thiết kế" để CTO và Product Owner (COO) không đi chệch hướng:
 
-## 3.3 Các thành phần giải pháp
+| # | Nguyên tắc | Ý nghĩa cho BGĐ (WHAT) | Hệ quả kỹ thuật (WHY) |
+|---|---|---|---|
+| 1 | **Automation First** | Mặc định mọi việc lặp lại phải do máy làm; con người chỉ chạm vào ngoại lệ | Mọi luồng nghiệp vụ thiết kế dưới dạng job bất đồng bộ (Hangfire), không có bước "chờ người bấm nút" trong đường đi chuẩn |
+| 2 | **Data Ownership** | HSA phải **sở hữu dữ liệu của chính mình**, không bị khóa trong công cụ bên thứ ba | Integration DB (PostgreSQL) + ClassIn Data Subscription lưu bản sao dữ liệu học tập → thoát vendor lock-in (P2) |
+| 3 | **Non-Disruptive Migration** | Chuyển đổi **không được làm tụt doanh số** hay rối loạn đội ngũ đang chạy | Chạy song song hệ cũ–mới, feature flags, rollback từng phần (chi tiết 3.4) |
+| 4 | **Exception-Based Human Work** | Nhân sự chuyển từ "gõ cho từng HS" sang "xử lý trường hợp đặc biệt" | Hệ thống tự phát hiện ngoại lệ → alert đúng người (Zalo) thay vì để lỗi trôi vào im lặng |
+| 5 | **Scale-Ready** | Thêm 10.000 học sinh hay mở Đà Nẵng **không cần thêm nhân công vận hành theo tỉ lệ** | Kiến trúc stateless, job queue scale ngang, SBD generation an toàn race-condition (chịu tải spike 780 HS/ngày 2027) |
 
-| Thành phần | Vai trò (giải thích cho BGĐ) | Chi phí |
+> Năm nguyên tắc này không phải khẩu hiệu — chúng là tiêu chí để **từ chối** những quyết định sai. Ví dụ: bất kỳ đề xuất nào yêu cầu "nhân viên bấm nút để chạy" sẽ bị loại vì vi phạm nguyên tắc 1; bất kỳ tích hợp nào không lưu lại bản sao dữ liệu sẽ bị loại vì vi phạm nguyên tắc 2.
+
+## 3.2 Kiến trúc 3 lớp của HSA Integration Platform
+
+Hệ thống được chia thành **3 lớp tách bạch**, mỗi lớp một trách nhiệm rõ ràng. Cách chia này quan trọng vì nó cho phép thay/sửa từng lớp mà không đụng các lớp khác — nền tảng cho nguyên tắc Non-Disruptive.
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│  LỚP 3 — CHANNELS & EXPERIENCE  (Học sinh · Phụ huynh · CTV thấy gì)  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────────┐ ┌──────────┐ ┌─────────┐ │
+│  │ Zalo OA  │ │  Email   │ │  Web portal  │ │   CTV    │ │ Parent  │ │
+│  │  (ZNS)   │ │  (SMTP)  │ │ (UX 8→3 bước)│ │  portal  │ │ portal  │ │
+│  └──────────┘ └──────────┘ └──────────────┘ └──────────┘ │ (GĐ2-3) │ │
+│                                                           └─────────┘ │
+└───────────────────────────────▲──────────────────────────────────────┘
+                                 │  (đọc/ghi qua API)
+┌───────────────────────────────┴──────────────────────────────────────┐
+│  LỚP 2 — DATA & MANAGEMENT  (Odoo Community — nguồn dữ liệu duy nhất) │
+│  ┌────────────┐ ┌────────────┐ ┌─────────────┐ ┌──────────────────┐  │
+│  │ HS · Phụ   │ │ CRM        │ │ Kế toán:    │ │ Dashboard BGĐ    │  │
+│  │ huynh · Đơn│ │ pipeline:  │ │ đối soát,   │ │ kỳ thi × cơ sở × │  │
+│  │ hàng · Hóa │ │ lead→chốt→ │ │ thù lao GV, │ │ kênh × CTV       │  │
+│  │ đơn · H.hồng│ │ nhập học  │ │ hoa hồng CTV│ │ (realtime)       │  │
+│  └────────────┘ └────────────┘ └─────────────┘ └──────────────────┘  │
+└───────────────────────────────▲──────────────────────────────────────┘
+                                 │  JSON-RPC (/web/dataset/call_kw)
+                                 │  .NET ghi/đọc Odoo — KHÔNG EF Core vào Odoo DB
+┌───────────────────────────────┴──────────────────────────────────────┐
+│  LỚP 1 — AUTOMATION CORE  (HSA Integration Platform — .NET 10)        │
+│                                                                       │
+│   ┌─────────────────┐      ┌──────────────────────────────────────┐  │
+│   │ Webhook Receiver│─────▶│  Job Orchestrator (Hangfire)         │  │
+│   │ SePay (HMAC)    │      │  chuỗi job bất đồng bộ + retry       │  │
+│   │ ClassIn DataSub │      └──────────────────┬───────────────────┘  │
+│   └─────────────────┘                         │                      │
+│   ┌─────────────────┐   ┌─────────────────────┴──────────────────┐  │
+│   │  SBD Generator  │   │  Integration Adapters                   │  │
+│   │  (atomic, race- │   │  SePay · ClassIn · Zalo OA · Odoo      │  │
+│   │  condition-safe)│   └────────────────────────────────────────┘  │
+│   └─────────────────┘   ┌────────────────────────────────────────┐  │
+│   ┌─────────────────┐   │  Exception Handler                      │  │
+│   │ Integration DB  │   │  phát hiện ngoại lệ → alert đúng người  │  │
+│   │ (PostgreSQL)    │   └────────────────────────────────────────┘  │
+│   │ enrollments ·   │                                                │
+│   │ students ·      │   ◀── KHÔNG phải Odoo DB. Đây là DB riêng     │
+│   │ parents · SBD   │       của Platform, phục vụ tốc độ & toàn vẹn │
+│   │ seq · CTV attr  │                                                │
+│   └─────────────────┘                                                │
+└──────────────────────────────────────────────────────────────────────┘
+        ▲ webhook PUSH              ▲ webhook PUSH
+   [ SePay: tiền về ]         [ ClassIn: sự kiện học tập ]
+```
+
+### Lớp 1 — Automation Core (HSA Integration Platform, .NET 10 Clean Architecture)
+
+Đây là "bộ não" do CTO nội bộ phát triển. Nhiệm vụ: nhận sự kiện từ bên ngoài (tiền về, học sinh vắng…) và **tự động chạy chuỗi hành động** mà không cần con người.
+
+- **Webhook Receiver:** điểm nhận sự kiện PUSH từ SePay (khi tiền về) và ClassIn Data Subscription (khi có sự kiện học tập). Mọi webhook SePay đều được **xác thực HMAC** trước khi xử lý — chống giả mạo lệnh thanh toán.
+- **Job Orchestrator (Hangfire):** điều phối các chuỗi job **bất đồng bộ**. Khi một webhook đến, nó không xử lý ngay trong request mà đẩy vào hàng đợi → đảm bảo chịu được spike (520–780 HS/ngày) và **retry tự động** khi một bước lỗi.
+- **Integration Adapters:** mỗi hệ thống bên ngoài có một adapter riêng (SePay adapter, ClassIn adapter, Zalo OA adapter, Odoo adapter). Tách adapter giúp **thay/sửa một tích hợp mà không đụng các tích hợp khác** (nguyên tắc Non-Disruptive + Scale-Ready).
+- **SBD Generator (atomic, race-condition-safe):** sinh số báo danh theo format `[KỲ_THI]-[NĂM]-[SEQ_5]` (vd `HSA-2026-08421`). Dùng cơ chế `UPDATE ... RETURNING` của PostgreSQL để **đảm bảo không trùng số ngay cả khi 100 học sinh thanh toán cùng một giây** — điều bất khả thi với cách tạo tay hiện nay (N1).
+- **Exception Handler:** khi một bước thất bại sau khi đã retry, không để lỗi trôi vào im lặng — hệ thống tự **đẩy cảnh báo cho đúng người** (vd Zalo cho Quản lý lớp), kèm đủ thông tin để xử lý.
+- **Integration DB (PostgreSQL riêng — KHÔNG phải Odoo DB):** lưu các bảng `enrollments`, `students`, `parents`, `SBD sequences`, `CTV attribution`. Đây là DB **riêng của Platform**, phục vụ tốc độ và toàn vẹn dữ liệu cho các luồng tự động. **Vì sao tách khỏi Odoo DB:** Platform không bao giờ truy cập trực tiếp vào database nội bộ của Odoo (qua EF Core hay SQL) — vì làm vậy sẽ phá vỡ tính toàn vẹn của Odoo và khóa cứng phiên bản. Thay vào đó Platform giao tiếp với Odoo **chỉ qua API** (xem Lớp 2).
+
+### Lớp 2 — Data & Management (Odoo Community, miễn phí, self-hosted)
+
+Đây là **nguồn dữ liệu duy nhất (single source of truth)** cho toàn doanh nghiệp — thay thế cho mớ Google Sheet + Drive cá nhân hiện nay (N8, N9).
+
+- **Single source of truth** cho: học sinh, phụ huynh, đơn hàng, hóa đơn, hoa hồng CTV. Hết tình trạng "dữ liệu thật nằm đâu không ai biết".
+- **CRM pipeline:** quản lý vòng đời khách hàng `lead → tư vấn → chốt → nhập học`, mỗi bước có dữ liệu để đo tỉ lệ chuyển đổi.
+- **Kế toán:** đối soát thanh toán (thay 2 giờ tay/ngày — N3), tính thù lao giảng viên (N4), tính hoa hồng CTV (N5) — tự động dựa trên dữ liệu sạch.
+- **Dashboard BGĐ:** báo cáo **thời gian thực** theo các trục `kỳ thi × cơ sở × kênh × CTV` — chấm dứt tình trạng "điều hành mù" (N7, Mục 2.5).
+- **Cầu nối .NET ↔ Odoo:** Platform ghi/đọc Odoo **qua JSON-RPC API** (`/web/dataset/call_kw`), **KHÔNG dùng EF Core đâm thẳng vào Odoo DB**. Đây là quyết định kiến trúc then chốt: dùng API giữ cho Odoo tự quản lý toàn vẹn dữ liệu, cho phép nâng cấp Odoo độc lập, và tránh khóa cứng vào sơ đồ bảng nội bộ của Odoo.
+
+### Lớp 3 — Channels & Experience
+
+Đây là lớp học sinh, phụ huynh và CTV **trực tiếp nhìn thấy và tương tác**.
+
+- **Zalo OA (tin nhắn ZNS template):** gửi tin nhắn đã được xác thực mẫu trước (ZNS) cho: onboarding (SBD + hướng dẫn), cảnh báo vắng học, thông báo hoa hồng. Có webhook nhận phản hồi từ học sinh/phụ huynh.
+- **Email (qua SMTP):** kênh dự phòng tự động cho hướng dẫn onboarding — đảm bảo HS vẫn nhận thông tin nếu chưa theo dõi Zalo OA.
+- **Web portal:** cải thiện trải nghiệm — **giảm hành trình sau thanh toán từ 8 bước xuống 3 bước** (thanh toán → nhận SBD → vào lớp), xóa các form khai báo thừa (Mục 2.1).
+- **CTV portal:** CTV **tự xem hoa hồng thời gian thực**, hết cảnh chờ kế toán tính tay và tranh chấp (N5, P3).
+- **Parent portal (Giai đoạn 2):** phụ huynh xem tiến trình học của con, nhận cảnh báo chủ động — nền tảng cho việc khai thác tệp phụ huynh (P9).
+
+## 3.3 Bốn luồng tự động hóa cốt lõi
+
+Bốn luồng dưới đây là "trái tim" của hệ thống, triển khai theo thứ tự ưu tiên. Mỗi luồng được mô tả bằng diagram bước-bước để cả BGĐ lẫn technical lead cùng hiểu.
+
+### Flow A — Thanh toán → Onboarding tự động (Ưu tiên 1, Giai đoạn 1)
+
+Đây là luồng quan trọng nhất, giải quyết trực tiếp nỗi đau lớn nhất (onboarding 2–8 giờ → dưới 2 phút) và xóa các điểm lỗi đơn R3/N1/N2.
+
+```
+HS thanh toán → SePay webhook (PUSH) → HMAC verify → Hangfire job:
+  [1] Sinh SBD atomic (PostgreSQL UPDATE...RETURNING)
+        → format HSA-2026-08421, không bao giờ trùng
+  [2] ClassIn V1 API: addSchoolStudent + addCourseStudent
+        → học sinh được cấp quyền vào đúng lớp
+  [3] Zalo ZNS: gửi SBD + mã kích hoạt + hướng dẫn 3 bước
+  [4] Email backup: template hướng dẫn (phòng khi chưa follow OA)
+  [5] Odoo (JSON-RPC): ghi enrollment record vào nguồn dữ liệu chung
+  ────────────────────────────────────────────────────────────────
+  → Toàn bộ hoàn thành < 2 phút. Học sinh vào lớp NGAY, 24/7.
+```
+
+**Xử lý ngoại lệ (nguyên tắc Exception-Based):**
+- **Idempotent:** nếu SePay gửi trùng một webhook (cùng giao dịch) → hệ thống nhận diện và **bỏ qua**, không tạo 2 SBD cho cùng một lần thanh toán.
+- **Retry exponential backoff:** nếu ClassIn lỗi tạm thời → tự thử lại **3 lần** với khoảng cách tăng dần.
+- **Alert:** nếu sau 3 lần vẫn lỗi → Exception Handler gửi **alert Zalo cho Quản lý lớp** phụ trách, kèm SBD và lý do → người xử lý trong vài phút thay vì học sinh kẹt nhiều giờ.
+
+> **Giá trị BGĐ:** đây là luồng biến nỗi đau "260 HS chờ 8 giờ trong đợt khai giảng HCM" thành "260 HS vào lớp trong vài phút, không thêm một nhân công nào".
+
+### Flow B — Chăm sóc chủ động (ClassIn Data Subscription, Giai đoạn 2)
+
+Giải quyết P7 ("học sinh ghost") — phát hiện học sinh sắp bỏ học **trước khi đã quá muộn**.
+
+```
+ClassIn PUSH event (học sinh vắng buổi) → webhook → Platform:
+  [1] Ghi attendance record vào Integration DB
+  [2] Nếu vắng ≥ 3 buổi liên tiếp → Hangfire job:
+        • Alert Zalo cho Quản lý lớp (QLL) phụ trách đúng lớp đó
+        • Ghi care log vào Odoo (để không sót, để bàn giao được)
+  [3] QLL liên hệ học sinh → ghi kết quả → tạo Odoo CRM activity
+```
+
+> **Giá trị:** ở 20.000 HS, drop-out 5% = 1.000 em không hoàn thành khóa. Phát hiện sớm vừa giữ chân (bảo vệ uy tín kết quả thi), vừa mở cơ hội up-sell đúng nhóm có nhu cầu (gia hạn, phụ đạo).
+
+### Flow C — CTV Attribution & Hoa hồng (Giai đoạn 2)
+
+Giải quyết N5/P3 — chấm dứt tính hoa hồng tay (2 ngày công/tháng) và tranh chấp attribution.
+
+```
+Học sinh click link CTV (vd ?ref=CTV001) →
+  [1] Platform ghi cookie/session ref (gắn nguồn ngay từ đầu)
+  [2] Khi học sinh thanh toán: gắn attribution vào enrollment record
+  [3] Đầu tháng kế tiếp: batch job tự động tính hoa hồng
+  [4] Odoo: tạo phiếu hoa hồng + xuất danh sách chuyển khoản
+  [5] CTV tự xem số realtime trên CTV portal (không chờ, không cãi)
+```
+
+> **Giá trị:** quy tắc attribution **công khai và do hệ thống áp dụng tự động** → hết tranh chấp, giữ được lực lượng bán hàng — nguồn tăng trưởng chính của HSA.
+
+### Flow D — Family CRM & Parent Nurturing (Giai đoạn 3)
+
+Khai thác P9 — nguồn doanh thu ẩn 3,2–10,8 tỷ/năm từ tệp phụ huynh đã tin tưởng.
+
+```
+Khi HS đăng ký: ghi profile phụ huynh (SĐT, email, số con) →
+  [1] Liên kết family (nhận diện anh/em cùng một phụ huynh)
+  [2] Khi HS hoàn thành khóa → trigger nurture sequence cho phụ huynh:
+        "Em nhỏ của [tên HS] sẽ thi ĐGNL trong [X tháng]?"
+  [3] Referral: phụ huynh giới thiệu → nhận hoa hồng/ưu đãi,
+        track qua ref link riêng của phụ huynh (vd ref=PH001)
+```
+
+> **Giá trị:** biến tệp khách hàng nóng nhất (phụ huynh đã trả tiền, đã tin tưởng) thành nguồn tăng trưởng gần như **không tốn chi phí marketing** — tỉ lệ chuyển đổi cao gấp 5–10 lần khách lạnh.
+
+## 3.4 Chiến lược "Non-Disruptive Migration" — không gây gián đoạn kinh doanh
+
+> **Đây là phần BGĐ cần yên tâm nhất.** Rủi ro lớn nhất của mọi dự án chuyển đổi không phải là kỹ thuật — mà là **làm rối loạn bộ máy đang chạy**, khiến doanh số tụt trong giai đoạn chuyển tiếp. Đề xuất này thiết kế để điều đó **không xảy ra**.
+
+Năm nguyên tắc chống gián đoạn:
+
+| Nguyên tắc | Cách làm cụ thể | Vì sao an toàn |
 |---|---|---|
-| **HSA Integration Platform** | "Bộ não kết nối" do CTO nội bộ phát triển, nối SePay → tạo SBD → ClassIn → Zalo thành một chuỗi tự động | Lương CTO: 50–100 triệu/năm |
-| **Odoo Community** | Phần mềm quản trị doanh nghiệp mã nguồn mở, làm "kho dữ liệu chung" và nơi xuất báo cáo/dashboard | **Miễn phí** |
-| **Tích hợp SePay** | Tận dụng điểm tự động sẵn có để kích hoạt cả chuỗi onboarding | 0 |
-| **Tích hợp ClassIn** | Tự động cấp quyền học sinh vào lớp + sau này lấy dữ liệu điểm danh/điểm số để chăm sóc chủ động | 0 (trong hợp đồng ClassIn hiện có) |
-| **Zalo OA (tin nhắn tự động)** | Tự động gửi SBD, hướng dẫn, cảnh báo cho học sinh/phụ huynh | Phí tin nhắn ~16 triệu/năm (GĐ 1, chỉ gửi tin onboarding) — **scale theo số học sinh** (đầy đủ ~32–48 triệu/năm khi gửi nhiều loại tin cho ~20.000+ HS) |
-| **Máy chủ (server)** | Nơi chạy hệ thống, có cả bản chính và bản dự phòng kiểm thử | ~50–60 triệu/năm |
+| **Giữ EZSale giai đoạn đầu** | Đội Sale **không đổi cách làm**; Platform chỉ "đọc" EZSale qua API/webhook | Quy trình tư vấn–chốt sale (phần "con người") không bị động đến |
+| **Run parallel** | Chạy hệ thống mới **song song** hệ cũ tối thiểu **2 tuần** trước khi cut-over | Đối chiếu kết quả hai hệ; chỉ chuyển khi xác nhận hệ mới đúng |
+| **Feature flags** | Bật/tắt từng tính năng mới **mà không ảnh hưởng production** | Triển khai từ từ; nếu một tính năng có vấn đề, tắt riêng nó |
+| **Rollback plan** | Mỗi integration **tắt được riêng lẻ**, fallback về quy trình thủ công | Một tích hợp lỗi không kéo sập cả hệ; luôn có đường lui an toàn |
+| **Đào tạo nhẹ** | Nhân sự **không phải học lại từ đầu** — chỉ học cách xử lý ngoại lệ trong tool mới | Đa số việc tay biến mất; nhân sự chỉ giám sát + xử lý 5% ngoại lệ |
 
-## 3.4 Điểm khác biệt quan trọng: GIỮ EZSale — không gây gián đoạn đội Sale
+**Lộ trình migration EZSale (giảm rủi ro tối đa):**
 
-> **Đây là điểm BGĐ cần yên tâm nhất.**
+```
+GĐ 1–2 │ EZSale giữ NGUYÊN.
+       │ Platform tích hợp đọc webhook/API EZSale.
+       │ → Đội Sale không cảm nhận thay đổi nào.
+       ▼
+GĐ 3   │ Pilot Odoo CRM với đội HCM (nhỏ hơn, ít rủi ro hơn HN).
+       │ → Học từ đội nhỏ trước khi đụng đội lớn.
+       ▼
+GĐ 4   │ Migrate HN sang Odoo CRM.
+       │ Tắt EZSale CHỈ SAU KHI confirm hệ mới chạy ổn định.
+```
 
-Một rủi ro lớn của các dự án chuyển đổi là **phá vỡ thói quen của đội bán hàng**, làm tụt doanh số trong giai đoạn chuyển tiếp. Đề xuất này **chủ động tránh điều đó:**
+> **Triết lý migration:** tự động hóa phần "khô khan, lặp lại" trước (onboarding, đối soát, hoa hồng); để yên phần "con người" (tư vấn, chốt sale) đến khi đội ngũ đã quen và hệ mới đã chứng minh ổn định. Không có bước nào "đập đi xây lại" toàn bộ trong một đêm.
 
-- **EZSale CRM được giữ nguyên** trong giai đoạn đầu. Đội Sale/CTV **không phải đổi cách làm việc.**
-- Hệ thống mới chỉ **"đọc" dữ liệu** từ EZSale, **không can thiệp** vào quy trình tư vấn.
-- Việc chuyển EZSale sang Odoo (nếu có) chỉ làm **về sau**, khi đội ngũ đã quen và sẵn sàng — không ép buộc.
+## 3.5 Phân tích Make vs Buy — tại sao xây nội bộ?
 
-> Triết lý: **tự động hóa phần "khô khan, lặp lại" trước (onboarding, đối soát, hoa hồng); để yên phần "con người" (tư vấn, chốt sale) cho đến khi an toàn.**
+BGĐ có quyền hỏi: "Sao không mua phần mềm có sẵn, hay thuê công ty làm cho nhanh?" Dưới đây là so sánh thẳng thắn ba phương án.
 
-## 3.5 Bảng So sánh Trước / Sau
+| Tiêu chí | A: Mua SaaS có sẵn | B: Thuê agency xây | C: Tự xây nội bộ (**ĐỀ XUẤT**) |
+|---|---|---|---|
+| **Chi phí ban đầu** | 0 (nhưng phí thuê bao hằng tháng) | 500–800 triệu | 50–100 triệu/năm (lương CTO) |
+| **Khớp với quy trình HSA** | Thấp — SaaS generic, không hiểu SBD/4 kỳ thi/Zalo | Phụ thuộc requirement rõ tới đâu | **Cao** — CTO hiểu sâu nghiệp vụ |
+| **Phụ thuộc vendor** | Cao — lock-in, vendor tăng giá | Cao — bảo trì là black box | **Thấp** — code trong tay HSA |
+| **Thời gian triển khai** | Nhanh (nhưng khớp kém) | 6–12 tháng | **3 tháng Giai đoạn 1** |
+| **Tích hợp đặc thù VN** (SePay, Zalo OA, ClassIn) | Khó/không có | Được nhưng đắt | **Tốt** — .NET ecosystem |
+| **Thay đổi theo nghiệp vụ** | Thấp (chờ vendor) | Tốn thêm phí mỗi lần | **Ngay lập tức** (CTO nội bộ) |
+| **Rủi ro chính** | Không khớp nghiệp vụ | Bàn giao xong rồi bỏ mặc | Phụ thuộc chất lượng CTO |
+
+**Kết luận — Phương án C (tự xây với CTO nội bộ) là tối ưu cho HSA vì:**
+
+1. **Nghiệp vụ đặc thù không có SaaS nào phù hợp sẵn:** SBD theo format riêng, 4 kỳ thi, 1.800–3.600 nhóm Zalo, tích hợp ClassIn + SePay + Zalo OA — không có sản phẩm đóng gói nào trên thị trường gánh được tổ hợp này.
+2. **Chi phí thấp hơn agency trong 3–4 năm** khi tính cả bảo trì: agency 500–800 triệu phát triển + 100–160 triệu/năm bảo trì; CTO nội bộ 50–100 triệu/năm và **giải quyết luôn cả việc vận hành lâu dài**.
+3. **CTO làm chủ code → không lock-in:** khi nghiệp vụ đổi (mở Đà Nẵng, thêm kỳ thi), thay đổi được thực hiện ngay, không phải xếp hàng chờ vendor và trả thêm phí.
+4. **Giải quyết đồng thời rủi ro R1** (phụ thuộc 1 dev outsource): có CTO nội bộ làm chủ kỹ thuật chính là lời giải cho điểm lỗi đơn nghiêm trọng nhất hiện nay.
+
+## 3.6 Bảng giải pháp theo từng vấn đề đã xác định
+
+Bảng dưới đây ánh xạ các vấn đề trọng yếu (đã phân tích ở PHẦN 1, 2, 2A, 2B) sang giải pháp cụ thể và giai đoạn xử lý — để BGĐ thấy rõ **mỗi đồng đầu tư giải quyết chính xác vấn đề nào**.
+
+| Vấn đề | Giải pháp cụ thể | Giai đoạn |
+|---|---|---|
+| **B0** — Mã khuyến mãi không validate (thất thoát doanh thu ngay) | Server-side coupon validation + audit log | Tuần 1 (CTO onboard) |
+| **N1** — Tạo SBD thủ công, dễ trùng/sai | Atomic SBD generation (PostgreSQL `UPDATE...RETURNING`) — tự động sau SePay webhook | GĐ 1 |
+| **N2** — Duyệt vào nhóm Zalo thủ công, không kiểm soát | Zalo OA: HS nhận link join group tự động, không cần duyệt tay | GĐ 1 |
+| **N3** — Đối soát SePay thủ công (~2h/ngày) | SePay webhook + auto-matching trong Odoo; người chỉ xử lý ngoại lệ | GĐ 1 |
+| **R3** — Chỉ 1 người duyệt HS vào lớp (SPOF) | Flow A tự động hóa toàn chuỗi onboarding — không phụ thuộc cá nhân | GĐ 1 |
+| **R1** — Phụ thuộc 1 dev outsource | Tuyển CTO nội bộ làm chủ codebase + tài liệu hóa | GĐ 0–1 |
+| **R2 / N9** — Dữ liệu trên Drive cá nhân, mất là không cứu được | Tập trung dữ liệu về Odoo + Integration DB có backup | GĐ 1–2 |
+| **N4** — Tính thù lao GV thủ công | Tự động tính trong Odoo từ dữ liệu buổi học | GĐ 2 |
+| **N5 / P3** — Tính hoa hồng CTV tay + tranh chấp | Flow C: attribution tự động + CTV portal realtime | GĐ 2 |
+| **N6** — Lead nhập tay, sót/trùng | Tự động đẩy lead landing page vào CRM | GĐ 2 |
+| **N7 / 2.5** — Không có dashboard realtime | Dashboard Odoo theo kỳ thi × cơ sở × kênh × CTV | GĐ 2 |
+| **N10 / P4** — Thiếu audit trail (rủi ro pháp lý PDPA) | Nhật ký truy cập tập trung + chính sách xử lý dữ liệu | GĐ 2 |
+| **N11 / P1** — Nhóm Zalo không scale, "HS mất trong Zalo" | Zalo OA + CRM track membership tự động | GĐ 1–2 |
+| **P2 / N12** — Vendor lock-in ClassIn, không có dữ liệu riêng | ClassIn Data Subscription → HSA sở hữu bản sao dữ liệu học tập | GĐ 2 |
+| **P7** — "Học sinh ghost" (drop-out không biết) | Flow B: alert tự động khi vắng ≥ 3 buổi | GĐ 2 |
+| **P8 / N8** — Google Sheet sẽ sập dưới tải lớn | Chuyển sang database thực (Odoo + Integration DB) | GĐ 1–2 |
+| **P9** — Chưa khai thác dữ liệu phụ huynh | Flow D: Family CRM + nurture phụ huynh + referral | GĐ 3 |
+| **N13 / P5** — Thiếu chuẩn hóa → không mở Đà Nẵng được | Quy trình chuẩn hóa + tự động → cơ sở mới "cắm vào là chạy" | GĐ 3–4 |
+| **2.6** — Lãnh đạo bị vùi đầu trong vận hành | Tự động hóa + dashboard → giải phóng năng lực lãnh đạo | GĐ 1–2 |
+
+## 3.7 Bảng So sánh Trước / Sau
 
 | # | Tình huống vận hành | HIỆN TẠI | SAU CHUYỂN ĐỔI |
 |---|---|---|---|
@@ -705,6 +928,10 @@ Một rủi ro lớn của các dự án chuyển đổi là **phá vỡ thói q
 | 12 | Lịch sử tư vấn khi Sale nghỉ | Mất (nằm trong Zalo cá nhân) | Lưu tập trung, **bàn giao được** |
 | 13 | Quản lý membership nhóm Zalo | Dò tay, "HS mất trong Zalo" | **Track tự động qua Zalo OA + CRM** |
 | 14 | Theo dõi chuyên cần / cảnh báo vắng | Không có, biết khi đã quá muộn | **Alert tự động khi vắng 3+ buổi** |
+| 15 | Hành trình đăng ký của học sinh | **8 bước** phức tạp, nhiều form thừa | **3 bước** (thanh toán → nhận SBD → vào lớp) |
+| 16 | Phụ huynh muốn biết tiến trình con | Không có thông tin, phải nhắn hỏi | **Nhận alert tự động** (parent portal) |
+| 17 | Marketing đo ROI từng kênh | Không biết kênh nào hiệu quả | **Dashboard attribution realtime** |
+| 18 | Giám đốc kinh doanh dùng thời gian | Đối soát tay, xử lý sự vụ | **Tập trung mở rộng thị trường** |
 
 ---
 
