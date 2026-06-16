@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HSA Education — Đề xuất Chuyển đổi Số | Executive Overview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    * { font-family: 'Be Vietnam Pro', sans-serif; }
+    html { scroll-behavior: smooth; }
+
+    /* ── Color tokens ── */
+    :root {
+      --navy: #0F2044;
+      --navy-mid: #1B3A6B;
+      --blue: #1D6FAB;
+      --sky: #38BDF8;
+      --gold: #F59E0B;
+      --emerald: #10B981;
+      --red: #EF4444;
+      --slate: #64748B;
+    }
+
+    body { background: #F8FAFC; color: #0F172A; }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #0F2044 0%, #1B3A6B 50%, #1D4ED8 100%);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    /* ── Metric cards ── */
+    .metric-card {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      position: relative; overflow: hidden;
+    }
+    .metric-card::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .metric-card.red::after   { background: linear-gradient(90deg, #EF4444, #F97316); }
+    .metric-card.gold::after  { background: linear-gradient(90deg, #F59E0B, #FCD34D); }
+    .metric-card.blue::after  { background: linear-gradient(90deg, #38BDF8, #818CF8); }
+    .metric-card.green::after { background: linear-gradient(90deg, #10B981, #34D399); }
+
+    /* ── Section headings ── */
+    .section-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #EFF6FF; color: #1D4ED8;
+      padding: 4px 14px; border-radius: 100px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    }
+
+    /* ── Cards ── */
+    .card { background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04); }
+
+    /* ── Timeline ── */
+    .phase-bar {
+      height: 48px; border-radius: 8px; position: relative;
+      display: flex; align-items: center; padding: 0 16px;
+      font-weight: 600; font-size: 13px; color: white;
+      overflow: hidden;
+    }
+    .phase-bar::before {
+      content: ''; position: absolute; inset: 0; opacity: 0.15;
+      background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,.3) 10px, rgba(255,255,255,.3) 12px);
+    }
+
+    /* ── Risk matrix ── */
+    .risk-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      display: inline-block; margin-right: 6px;
+    }
+
+    /* ── Compare table ── */
+    .compare-no  { color: #EF4444; font-weight: 600; }
+    .compare-yes { color: #10B981; font-weight: 600; }
+
+    /* ── CTA section ── */
+    .cta-section {
+      background: linear-gradient(135deg, #0F2044 0%, #1B3A6B 60%, #1D4ED8 100%);
+    }
+
+    /* ── Counter animation ── */
+    @keyframes count-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .counter { animation: count-up 0.6s ease forwards; }
+
+    /* ── Print ── */
+    @media print {
+      .no-print { display: none; }
+      body { background: white; }
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #F1F5F9; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #38BDF8, #818CF8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .warning-box {
+      border-left: 4px solid #EF4444;
+      background: linear-gradient(135deg, #FEF2F2, #FFF5F5);
+    }
+    .success-box {
+      border-left: 4px solid #10B981;
+      background: linear-gradient(135deg, #F0FDF4, #F0FDF4);
+    }
+    .info-box {
+      border-left: 4px solid #38BDF8;
+      background: linear-gradient(135deg, #F0F9FF, #F0F9FF);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     NAV BAR
+════════════════════════════════════════════ -->
+<nav class="no-print sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100 shadow-sm">
+  <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-700 to-indigo-600 flex items-center justify-center">
+        <span class="text-white font-black text-xs">HSA</span>
+      </div>
+      <span class="font-semibold text-slate-700 text-sm">Đề xuất Chuyển đổi Số 2026</span>
+      <span class="text-xs bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded-full">CONFIDENTIAL</span>
+    </div>
+    <div class="hidden md:flex items-center gap-6 text-sm text-slate-500">
+      <a href="#problem" class="hover:text-blue-700 transition">Vấn đề</a>
+      <a href="#market" class="hover:text-blue-700 transition">Thị trường</a>
+      <a href="#solution" class="hover:text-blue-700 transition">Giải pháp</a>
+      <a href="#roadmap" class="hover:text-blue-700 transition">Lộ trình</a>
+      <a href="#roi" class="hover:text-blue-700 transition">ROI</a>
+      <a href="#approval" class="hover:text-blue-700 transition">Phê duyệt</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════ -->
+<section class="hero py-20 px-6">
+  <div class="max-w-6xl mx-auto relative z-10">
+    <div class="flex flex-col items-center text-center mb-16">
+      <span class="text-xs font-bold tracking-widest text-blue-300 uppercase mb-4">Tài liệu Trình Ban Giám đốc · Tháng 7/2026</span>
+      <h1 class="text-5xl md:text-6xl font-black text-white leading-tight mb-6">
+        Đề xuất Xây dựng<br />
+        <span class="gradient-text">HSA Platform</span>
+      </h1>
+      <p class="text-xl text-blue-100 max-w-2xl mb-8 leading-relaxed">
+        Chuyển đổi vận hành từ <strong class="text-white">7 công cụ rời rạc</strong> sang<br />
+        <strong class="text-white">1 nền tảng thống nhất</strong> — tự động hóa, dữ liệu tập trung,<br />và sẵn sàng scale lên <strong class="text-amber-300">37.000 học sinh/năm</strong>
+      </p>
+      <div class="flex gap-4 flex-wrap justify-center">
+        <a href="#approval" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold px-8 py-3 rounded-xl transition flex items-center gap-2">
+          <i class="fas fa-check-circle"></i> Xem đề nghị phê duyệt
+        </a>
+        <a href="#problem" class="border border-white/30 hover:bg-white/10 text-white font-semibold px-8 py-3 rounded-xl transition flex items-center gap-2">
+          <i class="fas fa-chart-line"></i> Xem phân tích
+        </a>
+      </div>
+    </div>
+
+    <!-- KEY METRICS HERO -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="metric-card red p-5 text-center">
+        <div class="text-3xl font-black text-red-400 mb-1">2,4 tỷ</div>
+        <div class="text-xs text-slate-400 leading-tight">Chi phí hao phí<br />ước tính/năm</div>
+      </div>
+      <div class="metric-card gold p-5 text-center">
+        <div class="text-3xl font-black text-amber-400 mb-1">37.000</div>
+        <div class="text-xs text-slate-400 leading-tight">Học sinh/năm<br />dự kiến 2027</div>
+      </div>
+      <div class="metric-card blue p-5 text-center">
+        <div class="text-3xl font-black text-sky-400 mb-1">21%</div>
+        <div class="text-xs text-slate-400 leading-tight">Thị phần SAM<br />hiện tại</div>
+      </div>
+      <div class="metric-card green p-5 text-center">
+        <div class="text-3xl font-black text-emerald-400 mb-1">&lt;12 th</div>
+        <div class="text-xs text-slate-400 leading-tight">Thời gian<br />hoàn vốn</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 1 — VẤN ĐỀ
+════════════════════════════════════════════ -->
+<section id="problem" class="py-20 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-12">
+      <span class="section-badge"><i class="fas fa-exclamation-triangle text-red-500"></i> Vấn đề</span>
+      <h2 class="text-4xl font-black text-slate-800 mt-4 mb-3">Hạ tầng hiện tại <span class="text-red-500">không thể scale</span></h2>
+      <p class="text-slate-500 text-lg max-w-2xl mx-auto">7 công cụ rời rạc, không kết nối — tạo ra 14 nút thắt vận hành đang cản trở tăng trưởng</p>
+    </div>
+
+    <!-- 7 tool diagram -->
+    <div class="card p-8 mb-10">
+      <h3 class="text-lg font-bold text-slate-700 mb-6 flex items-center gap-2">
+        <i class="fas fa-puzzle-piece text-slate-400"></i> Hệ thống hiện tại: 7 công cụ, 0 kết nối
+      </h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 text-center">
+          <div class="text-2xl mb-1">📊</div>
+          <div class="font-bold text-slate-700 text-sm">EZSale CRM</div>
+          <div class="text-xs text-slate-400">Lead & Pipeline</div>
+        </div>
+        <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+          <div class="text-2xl mb-1">📑</div>
+          <div class="font-bold text-slate-700 text-sm">Google Sheet</div>
+          <div class="text-xs text-slate-400">Dữ liệu học sinh</div>
+        </div>
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+          <div class="text-2xl mb-1">🎓</div>
+          <div class="font-bold text-slate-700 text-sm">ClassIn</div>
+          <div class="text-xs text-slate-400">Lớp học online</div>
+        </div>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-center">
+          <div class="text-2xl mb-1">💰</div>
+          <div class="font-bold text-slate-700 text-sm">SePay</div>
+          <div class="text-xs text-slate-400">Thanh toán</div>
+        </div>
+        <div class="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
+          <div class="text-2xl mb-1">💬</div>
+          <div class="font-bold text-slate-700 text-sm">Zalo OA</div>
+          <div class="text-xs text-slate-400">Tương tác HS</div>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+          <div class="text-2xl mb-1">📁</div>
+          <div class="font-bold text-slate-700 text-sm">Google Drive</div>
+          <div class="text-xs text-slate-400">Lưu trữ rời rạc</div>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
+          <div class="text-2xl mb-1">🌐</div>
+          <div class="font-bold text-slate-700 text-sm">hsavnu.edu.vn</div>
+          <div class="text-xs text-slate-400">Web đăng ký</div>
+        </div>
+        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 text-center">
+          <div class="text-2xl mb-1">🧾</div>
+          <div class="font-bold text-slate-700 text-sm">Kế toán thủ công</div>
+          <div class="text-xs text-slate-400">Excel / sổ tay</div>
+        </div>
+      </div>
+      <div class="warning-box p-4 rounded-xl">
+        <p class="text-sm text-red-700 font-semibold">
+          <i class="fas fa-triangle-exclamation mr-2"></i>
+          Không có hệ thống nào kết nối với nhau. Mỗi luồng dữ liệu phải nhập tay ít nhất 2–3 lần. Khi scale lên 37.000 HS, tỉ lệ sai sót ước tính vượt 10%.
+        </p>
+      </div>
+    </div>
+
+    <!-- Waste costs + Error rate charts -->
+    <div class="grid md:grid-cols-2 gap-6 mb-10">
+      <div class="card p-6">
+        <h3 class="text-base font-bold text-slate-700 mb-1 flex items-center gap-2">
+          <i class="fas fa-money-bill-wave text-red-400"></i> Chi phí hao phí ước tính
+        </h3>
+        <p class="text-xs text-slate-400 mb-4">Triệu VND / năm</p>
+        <canvas id="wasteCostChart" height="220"></canvas>
+      </div>
+      <div class="card p-6">
+        <h3 class="text-base font-bold text-slate-700 mb-1 flex items-center gap-2">
+          <i class="fas fa-chart-line text-orange-400"></i> Tỉ lệ sai sót onboarding theo scale
+        </h3>
+        <p class="text-xs text-slate-400 mb-4">Tỉ lệ lỗi % theo số học sinh/ngày (dự phóng)</p>
+        <canvas id="errorRateChart" height="220"></canvas>
+      </div>
+    </div>
+
+    <!-- 8 Security risks -->
+    <div class="card p-6 mb-6">
+      <h3 class="text-base font-bold text-slate-700 mb-4 flex items-center gap-2">
+        <i class="fas fa-shield-halved text-red-400"></i> 8 Lỗ hổng bảo mật nghiêm trọng — Website hsavnu.edu.vn
+      </h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="bg-red-50 border border-red-200 rounded-xl p-3">
+          <span class="text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full">CRITICAL</span>
+          <p class="text-sm font-semibold text-slate-700 mt-2">B0 — Mã KM bất kỳ</p>
+          <p class="text-xs text-slate-400">Nhập mã bất kỳ → vẫn được giảm tiền. Đang chảy máu doanh thu.</p>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-3">
+          <span class="text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full">CRITICAL</span>
+          <p class="text-sm font-semibold text-slate-700 mt-2">B1 — Webhook SePay</p>
+          <p class="text-xs text-slate-400">Thiếu HMAC verification. Có thể giả mạo thanh toán.</p>
+        </div>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-3">
+          <span class="text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full">CRITICAL</span>
+          <p class="text-sm font-semibold text-slate-700 mt-2">B2 — MD5 Password</p>
+          <p class="text-xs text-slate-400">Mã hóa mật khẩu lỗi thời. Dễ dàng bị crack.</p>
+        </div>
+        <div class="bg-orange-50 border border-orange-200 rounded-xl p-3">
+          <span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">HIGH</span>
+          <p class="text-sm font-semibold text-slate-700 mt-2">B3–B7</p>
+          <p class="text-xs text-slate-400">CSRF, reCAPTCHA, input validation, MFA admin, CDN SRI.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottleneck list -->
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="info-box p-4 rounded-xl">
+        <div class="font-bold text-blue-700 text-sm mb-2"><i class="fas fa-user-plus mr-1"></i> Onboarding thủ công</div>
+        <p class="text-xs text-slate-600">Học sinh thanh toán → phải điền 8 bước form thủ công → nhân viên gõ tay SBD → duyệt ClassIn → Zalo. Trung bình ~15 phút/học sinh. 55 HS/ngày = ~14h/ngày thao tác tay.</p>
+      </div>
+      <div class="info-box p-4 rounded-xl">
+        <div class="font-bold text-blue-700 text-sm mb-2"><i class="fas fa-database mr-1"></i> Dữ liệu không kiểm soát</div>
+        <p class="text-xs text-slate-600">Dữ liệu học sinh phân tán trong Google Drive cá nhân. Nhân viên nghỉ → mất dữ liệu vĩnh viễn. Không có backup, không có audit trail.</p>
+      </div>
+      <div class="info-box p-4 rounded-xl">
+        <div class="font-bold text-blue-700 text-sm mb-2"><i class="fas fa-chart-pie mr-1"></i> Marketing ROI mù quáng</div>
+        <p class="text-xs text-slate-600">Không biết CAC theo kênh, không đo conversion rate, không biết kênh nào sinh doanh thu — chi ngân sách marketing theo cảm tính.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 2 — THỊ TRƯỜNG
+════════════════════════════════════════════ -->
+<section id="market" class="py-20 px-6 bg-slate-50">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-12">
+      <span class="section-badge"><i class="fas fa-globe text-blue-500"></i> Thị trường</span>
+      <h2 class="text-4xl font-black text-slate-800 mt-4 mb-3">Cơ hội <span class="text-blue-600">còn rất lớn</span></h2>
+      <p class="text-slate-500 text-lg">HSA đang phục vụ 21% thị trường SAM — 79% còn lại đang chờ</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8 mb-10">
+      <!-- Market chart -->
+      <div class="card p-6">
+        <h3 class="text-base font-bold text-slate-700 mb-1">TAM / SAM / Thị phần HSA</h3>
+        <p class="text-xs text-slate-400 mb-4">Số lượng thí sinh / năm (2025)</p>
+        <canvas id="marketChart" height="280"></canvas>
+      </div>
+
+      <!-- Growth chart -->
+      <div class="card p-6">
+        <h3 class="text-base font-bold text-slate-700 mb-1">Tăng trưởng học sinh HSA</h3>
+        <p class="text-xs text-slate-400 mb-4">HN + HCM, dự kiến 2025–2027</p>
+        <canvas id="growthChart" height="280"></canvas>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="card p-6 border-l-4 border-blue-500">
+        <div class="text-3xl font-black text-blue-600 mb-1">269.000</div>
+        <div class="font-semibold text-slate-700 text-sm">TAM — Thị trường tổng</div>
+        <div class="text-xs text-slate-400 mt-1">Thí sinh dự thi ĐGNL HSA, ĐGNL HCM, BCA, BQP / năm</div>
+      </div>
+      <div class="card p-6 border-l-4 border-indigo-500">
+        <div class="text-3xl font-black text-indigo-600 mb-1">~95.000</div>
+        <div class="font-semibold text-slate-700 text-sm">SAM — Thị trường tiếp cận</div>
+        <div class="text-xs text-slate-400 mt-1">Thí sinh có nhu cầu ôn luyện và khả năng chi trả 2–3 triệu</div>
+      </div>
+      <div class="card p-6 border-l-4 border-emerald-500">
+        <div class="text-3xl font-black text-emerald-600 mb-1">3,2–10,8 tỷ</div>
+        <div class="font-semibold text-slate-700 text-sm">Cơ hội phụ huynh / gia đình</div>
+        <div class="text-xs text-slate-400 mt-1">Anh em trong gia đình học sinh hiện tại — chưa được khai thác</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 3 — GIẢI PHÁP
+════════════════════════════════════════════ -->
+<section id="solution" class="py-20 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-12">
+      <span class="section-badge"><i class="fas fa-lightbulb text-amber-500"></i> Giải pháp</span>
+      <h2 class="text-4xl font-black text-slate-800 mt-4 mb-3">So sánh <span class="text-indigo-600">Giải pháp A vs B</span></h2>
+      <p class="text-slate-500 text-lg">Hai hướng triển khai — phân tích khách quan để chọn phương án tối ưu</p>
+    </div>
+
+    <!-- A vs B comparison -->
+    <div class="grid md:grid-cols-2 gap-6 mb-10">
+      <!-- Option A -->
+      <div class="card p-6 border border-slate-200 opacity-80">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+            <span class="font-black text-slate-500">A</span>
+          </div>
+          <div>
+            <div class="font-bold text-slate-700">Giải pháp A — Odoo + .NET</div>
+            <div class="text-xs text-slate-400">ERP miễn phí + Integration layer</div>
+          </div>
+          <span class="ml-auto text-xs bg-slate-100 text-slate-500 px-3 py-1 rounded-full font-semibold">Không chọn</span>
+        </div>
+        <div class="space-y-2 mb-4">
+          <div class="flex items-start gap-2 text-sm">
+            <i class="fas fa-check text-emerald-400 mt-0.5 text-xs w-4"></i>
+            <span class="text-slate-600">License ERP miễn phí (Odoo Community)</span>
+          </div>
+          <div class="flex items-start gap-2 text-sm">
+            <i class="fas fa-check text-emerald-400 mt-0.5 text-xs w-4"></i>
+            <span class="text-slate-600">CRM + Kế toán + HR trong 1 hệ thống</span>
+          </div>
+          <div class="flex items-start gap-2 text-sm">
+            <i class="fas fa-times text-red-400 mt-0.5 text-xs w-4"></i>
+            <span class="text-slate-600">Kế toán VN không quen Odoo — chuẩn Thông tư 200 phức tạp</span>
+          </div>
+          <div class="flex items-start gap-2 text-sm">
+            <i class="fas fa-times text-red-400 mt-0.5 text-xs w-4"></i>
+            <span class="text-slate-600">CTO phải có kinh nghiệm Odoo riêng — hiếm, đắt</span>
+          </div>
+          <div class="flex items-start gap-2 text-sm">
+            <i class="fas fa-times text-red-400 mt-0.5 text-xs w-4"></i>
+            <span class="text-slate-600">Rủi ro: kế toán không dùng được → quay về Excel song song</span>
+          </div>
+          <div class="flex items-start gap-2 text-sm">
+            <i class="fas fa-times text-red-400 mt-0.5 text-xs w-4"></i>
+            <span class="text-slate-600">Ít đối tác tư vấn có kinh nghiệm Odoo tại VN</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option B -->
+      <div class="card p-6 border-2 border-blue-500 relative">
+        <div class="absolute -top-3 right-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+          <i class="fas fa-star mr-1"></i>PHƯƠNG ÁN CHỌN
+        </div>
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+            <span class="font-black text-white">B</span>
+          </div>
+          <div>
+            <div class="font-bold text-slate-700">Giải pháp B — MISA SME + .NET</div>
+            <div class="text-xs text-slate-400">Kế toán VN chuẩn + Platform tự xây</div>
+          </div>
+        </div>
+        <div class="space-y-2 mb-4">
+          <div class="flex items-start gap-2 text-sm">
+            <i class="fas fa-check text-emerald-500 mt-0.5 text-xs w-4"></i>
+            <span class="text-slate-600"><strong>Kế toán MISA</strong>: chuẩn pháp lý VN (TT200), kế toán đã quen, triển khai ngay</span>
+          </div>
+          <div class="flex items-start gap-2 text-sm">
+            <i class="fas fa-check text-emerald-500 mt-0.5 text-xs w-4"></i>
+            <span class="text-slate-600">CTO tập trung 100% vào .NET Platform — không cần kinh nghiệm Odoo</span>
+          </div>
+          <div class="flex items-start gap-2 text-sm">
+            <i class="fas fa-check text-emerald-500 mt-0.5 text-xs w-4"></i>
+            <span class="text-slate-600">Tech stack đơn giản hơn, dễ tuyển dụng, dễ maintain</span>
+          </div>
+          <div class="flex items-start gap-2 text-sm">
+            <i class="fas fa-check text-emerald-500 mt-0.5 text-xs w-4"></i>
+            <span class="text-slate-600">.NET xây CRM, hoa hồng, thù lao, đối soát — đặc thù HSA</span>
+          </div>
+          <div class="flex items-start gap-2 text-sm">
+            <i class="fas fa-check text-emerald-500 mt-0.5 text-xs w-4"></i>
+            <span class="text-slate-600">PostgreSQL là nguồn sự thật duy nhất — HSA sở hữu hoàn toàn</span>
+          </div>
+          <div class="flex items-start gap-2 text-sm">
+            <i class="fas fa-minus text-amber-400 mt-0.5 text-xs w-4"></i>
+            <span class="text-slate-600">MISA ~3–6 triệu/năm license (thay vì miễn phí như Odoo)</span>
+          </div>
+        </div>
+        <div class="success-box p-3 rounded-xl">
+          <p class="text-xs text-emerald-700 font-semibold">
+            <i class="fas fa-check-circle mr-1"></i>
+            Rào cản thực tế lớn nhất của Odoo: kế toán VN không quen, chuẩn báo cáo thuế phức tạp. MISA giải quyết điều này ngay lập tức.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Architecture diagram -->
+    <div class="card p-8">
+      <h3 class="text-lg font-bold text-slate-700 mb-6 flex items-center gap-2">
+        <i class="fas fa-sitemap text-blue-400"></i> Kiến trúc HSA Platform — Giải pháp B
+      </h3>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-2xl p-5 border border-blue-100">
+          <div class="font-bold text-blue-700 text-sm mb-3 flex items-center gap-2">
+            <i class="fas fa-users"></i> TẦNG NGƯỜI DÙNG
+          </div>
+          <div class="space-y-2">
+            <div class="bg-white rounded-lg px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">👑 BGĐ — Dashboard thời gian thực</div>
+            <div class="bg-white rounded-lg px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">💼 Sale — CRM, Pipeline, Lead</div>
+            <div class="bg-white rounded-lg px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">🤝 CTV — Hoa hồng, Referral</div>
+            <div class="bg-white rounded-lg px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">🎓 Học sinh — Ôn luyện, Lịch học</div>
+            <div class="bg-white rounded-lg px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">👨‍👩‍👧 Phụ huynh — Tiến trình con</div>
+            <div class="bg-white rounded-lg px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">👨‍🏫 Giáo viên — Lịch dạy, Thù lao</div>
+            <div class="bg-white rounded-lg px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">🔧 Admin — Quản trị toàn hệ thống</div>
+          </div>
+        </div>
+        <div class="bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl p-5">
+          <div class="font-bold text-sky-300 text-sm mb-3 flex items-center gap-2">
+            <i class="fas fa-microchip"></i> HSA PLATFORM (.NET 10)
+          </div>
+          <div class="space-y-1.5">
+            <div class="bg-slate-700/60 rounded-lg px-3 py-2 text-xs font-mono text-slate-200">Auth Service (JWT, RBAC)</div>
+            <div class="bg-slate-700/60 rounded-lg px-3 py-2 text-xs font-mono text-slate-200">Enrollment Service (SBD)</div>
+            <div class="bg-slate-700/60 rounded-lg px-3 py-2 text-xs font-mono text-slate-200">Finance Service (hoa hồng)</div>
+            <div class="bg-slate-700/60 rounded-lg px-3 py-2 text-xs font-mono text-slate-200">CRM Service (lead, pipeline)</div>
+            <div class="bg-slate-700/60 rounded-lg px-3 py-2 text-xs font-mono text-slate-200">Learning Service (mock exam)</div>
+            <div class="bg-slate-700/60 rounded-lg px-3 py-2 text-xs font-mono text-slate-200">Notification (Zalo, Email)</div>
+            <div class="bg-emerald-700/60 rounded-lg px-3 py-2 text-xs font-mono text-emerald-200">PostgreSQL — SSOT</div>
+            <div class="bg-blue-700/60 rounded-lg px-3 py-2 text-xs font-mono text-blue-200">Hangfire (async jobs)</div>
+          </div>
+        </div>
+        <div class="bg-gradient-to-b from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-100">
+          <div class="font-bold text-amber-700 text-sm mb-3 flex items-center gap-2">
+            <i class="fas fa-plug"></i> TÍCH HỢP BÊN NGOÀI
+          </div>
+          <div class="space-y-2">
+            <div class="bg-white rounded-lg px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">💳 SePay — Thanh toán</div>
+            <div class="bg-white rounded-lg px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">🎓 ClassIn — Lớp học live</div>
+            <div class="bg-white rounded-lg px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">💬 Zalo OA — ZNS, chat</div>
+            <div class="bg-white rounded-lg px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">📊 MISA SME — Kế toán</div>
+            <div class="bg-white rounded-lg px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">🧾 VNPT/Viettel — Hóa đơn điện tử</div>
+            <div class="bg-white rounded-lg px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">🤖 OpenAI / Claude API — AI</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 4 — LỘ TRÌNH
+════════════════════════════════════════════ -->
+<section id="roadmap" class="py-20 px-6 bg-slate-50">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-12">
+      <span class="section-badge"><i class="fas fa-road text-indigo-500"></i> Lộ trình</span>
+      <h2 class="text-4xl font-black text-slate-800 mt-4 mb-3">5 Phase trong <span class="text-indigo-600">24 tháng</span></h2>
+      <p class="text-slate-500 text-lg">Phân kỳ rõ ràng — mỗi phase có KPI đo được và quyết định go/no-go</p>
+    </div>
+
+    <div class="card p-8 mb-8">
+      <!-- Timeline bars -->
+      <div class="space-y-4 mb-6">
+        <!-- Header -->
+        <div class="grid grid-cols-12 gap-1 text-xs text-slate-400 font-medium mb-2 px-2">
+          <div class="col-span-2">Phase</div>
+          <div class="col-span-7">
+            <div class="grid grid-cols-8 gap-0">
+              <div>T8</div><div>T9</div><div>T10</div><div>T12</div>
+              <div>T4</div><div>T9</div><div>T3</div><div>T9</div>
+            </div>
+          </div>
+          <div class="col-span-3 text-right">KPI chính</div>
+        </div>
+
+        <!-- Phase 0 -->
+        <div class="grid grid-cols-12 gap-2 items-center">
+          <div class="col-span-2">
+            <span class="text-xs font-bold text-slate-600">Phase 0</span>
+            <p class="text-xs text-slate-400">T8–9/2026</p>
+          </div>
+          <div class="col-span-7">
+            <div class="grid grid-cols-8 gap-1">
+              <div class="col-span-2 phase-bar" style="background: linear-gradient(135deg, #6366F1, #8B5CF6);">
+                <span class="text-[11px] truncate">Security + Foundation</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-3 text-right">
+            <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-semibold">B0–B7 đóng 100%</span>
+          </div>
+        </div>
+
+        <!-- Phase 1 -->
+        <div class="grid grid-cols-12 gap-2 items-center">
+          <div class="col-span-2">
+            <span class="text-xs font-bold text-slate-600">Phase 1</span>
+            <p class="text-xs text-slate-400">T10–12/2026</p>
+          </div>
+          <div class="col-span-7">
+            <div class="grid grid-cols-8 gap-1">
+              <div class="col-span-1 opacity-0"></div>
+              <div class="col-span-2 phase-bar" style="background: linear-gradient(135deg, #0EA5E9, #6366F1);">
+                <span class="text-[11px] truncate">Automation + Admin</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-3 text-right">
+            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">SBD &lt;2 phút</span>
+          </div>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="grid grid-cols-12 gap-2 items-center">
+          <div class="col-span-2">
+            <span class="text-xs font-bold text-slate-600">Phase 2</span>
+            <p class="text-xs text-slate-400">T1–4/2027</p>
+          </div>
+          <div class="col-span-7">
+            <div class="grid grid-cols-8 gap-1">
+              <div class="col-span-3 opacity-0"></div>
+              <div class="col-span-2 phase-bar" style="background: linear-gradient(135deg, #10B981, #0EA5E9);">
+                <span class="text-[11px] truncate">Teacher+CTV+Sale</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-3 text-right">
+            <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-semibold">Hoa hồng tự động</span>
+          </div>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class="grid grid-cols-12 gap-2 items-center">
+          <div class="col-span-2">
+            <span class="text-xs font-bold text-slate-600">Phase 3</span>
+            <p class="text-xs text-slate-400">T5–9/2027</p>
+          </div>
+          <div class="col-span-7">
+            <div class="grid grid-cols-8 gap-1">
+              <div class="col-span-4 opacity-0"></div>
+              <div class="col-span-2 phase-bar" style="background: linear-gradient(135deg, #F59E0B, #EF4444);">
+                <span class="text-[11px] truncate">Parent+Exam+Finance</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-3 text-right">
+            <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-semibold">E-invoice tự động</span>
+          </div>
+        </div>
+
+        <!-- Phase 4 -->
+        <div class="grid grid-cols-12 gap-2 items-center">
+          <div class="col-span-2">
+            <span class="text-xs font-bold text-slate-600">Phase 4</span>
+            <p class="text-xs text-slate-400">T10/2027–T3/2028</p>
+          </div>
+          <div class="col-span-7">
+            <div class="grid grid-cols-8 gap-1">
+              <div class="col-span-5 opacity-0"></div>
+              <div class="col-span-2 phase-bar" style="background: linear-gradient(135deg, #1D4ED8, #7C3AED);">
+                <span class="text-[11px] truncate">BGĐ Dashboard + AI</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-3 text-right">
+            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full font-semibold">AI drop-out predictor</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase legend -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 pt-6 border-t border-slate-100">
+        <div class="text-center">
+          <div class="text-lg font-black text-purple-600">2 tháng</div>
+          <div class="text-xs text-slate-400">Phase 0</div>
+          <div class="text-xs font-semibold text-slate-600">~210–350M</div>
+        </div>
+        <div class="text-center">
+          <div class="text-lg font-black text-blue-600">3 tháng</div>
+          <div class="text-xs text-slate-400">Phase 1</div>
+          <div class="text-xs font-semibold text-slate-600">~315–525M</div>
+        </div>
+        <div class="text-center">
+          <div class="text-lg font-black text-emerald-600">4 tháng</div>
+          <div class="text-xs text-slate-400">Phase 2</div>
+          <div class="text-xs font-semibold text-slate-600">~420–700M</div>
+        </div>
+        <div class="text-center">
+          <div class="text-lg font-black text-amber-600">5 tháng</div>
+          <div class="text-xs text-slate-400">Phase 3</div>
+          <div class="text-xs font-semibold text-slate-600">~525–875M</div>
+        </div>
+        <div class="text-center">
+          <div class="text-lg font-black text-indigo-600">6 tháng</div>
+          <div class="text-xs text-slate-400">Phase 4</div>
+          <div class="text-xs font-semibold text-slate-600">~630–1.050M</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decision gate -->
+    <div class="info-box p-5 rounded-2xl">
+      <p class="text-sm text-blue-700">
+        <i class="fas fa-flag-checkered mr-2"></i>
+        <strong>Cơ chế kiểm soát:</strong> Sau mỗi Phase, BGĐ nhận báo cáo KPI thực tế và ra quyết định go/no-go cho Phase tiếp theo. Quyết định hôm nay chỉ cần phê duyệt ngân sách <strong>Phase 0 + Phase 1 (~553–913 triệu)</strong>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 5 — TÀI CHÍNH & ROI
+════════════════════════════════════════════ -->
+<section id="roi" class="py-20 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-12">
+      <span class="section-badge"><i class="fas fa-chart-bar text-emerald-500"></i> Tài chính & ROI</span>
+      <h2 class="text-4xl font-black text-slate-800 mt-4 mb-3">Hoàn vốn <span class="text-emerald-600">dưới 12 tháng</span></h2>
+      <p class="text-slate-500 text-lg">Đầu tư hợp lý — tiết kiệm và unlock doanh thu lớn hơn nhiều lần chi phí</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8 mb-10">
+      <div class="card p-6">
+        <h3 class="text-base font-bold text-slate-700 mb-1">So sánh Đầu tư vs Tiết kiệm</h3>
+        <p class="text-xs text-slate-400 mb-4">Triệu VND / năm — kịch bản trung bình</p>
+        <canvas id="roiChart" height="280"></canvas>
+      </div>
+      <div class="card p-6">
+        <h3 class="text-base font-bold text-slate-700 mb-1">Cơ cấu đội ngũ kỹ thuật</h3>
+        <p class="text-xs text-slate-400 mb-4">Chi phí nhân sự tháng (triệu VND)</p>
+        <canvas id="teamChart" height="280"></canvas>
+      </div>
+    </div>
+
+    <!-- Finance table -->
+    <div class="card p-6 mb-6">
+      <h3 class="text-base font-bold text-slate-700 mb-4">Bảng tài chính tóm tắt</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-50 text-slate-500 text-xs uppercase">
+              <th class="text-left p-3 rounded-l-lg">Hạng mục</th>
+              <th class="text-right p-3">Năm 1 (2026–27)</th>
+              <th class="text-right p-3">Năm 2 (2027–28)</th>
+              <th class="text-right p-3 rounded-r-lg">Năm 3 (2028–29)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-t border-slate-50">
+              <td class="p-3 text-slate-600">💸 Đầu tư nhân sự tech</td>
+              <td class="p-3 text-right font-semibold text-red-500">–1.260 đến –2.100M</td>
+              <td class="p-3 text-right font-semibold text-red-500">–1.260 đến –2.100M</td>
+              <td class="p-3 text-right font-semibold text-red-500">–1.260 đến –2.100M</td>
+            </tr>
+            <tr class="border-t border-slate-50 bg-slate-50/50">
+              <td class="p-3 text-slate-600">✅ Tiết kiệm nhân lực trực tiếp</td>
+              <td class="p-3 text-right font-semibold text-emerald-500">+487M</td>
+              <td class="p-3 text-right font-semibold text-emerald-500">+712M</td>
+              <td class="p-3 text-right font-semibold text-emerald-500">+937M</td>
+            </tr>
+            <tr class="border-t border-slate-50">
+              <td class="p-3 text-slate-600">✅ Tiết kiệm chi phí cơ hội GĐ KD</td>
+              <td class="p-3 text-right font-semibold text-emerald-500">+288M</td>
+              <td class="p-3 text-right font-semibold text-emerald-500">+288M</td>
+              <td class="p-3 text-right font-semibold text-emerald-500">+288M</td>
+            </tr>
+            <tr class="border-t border-slate-50 bg-slate-50/50">
+              <td class="p-3 text-slate-600">✅ Doanh thu bảo vệ (giảm onboarding lỗi)</td>
+              <td class="p-3 text-right font-semibold text-emerald-500">+500M</td>
+              <td class="p-3 text-right font-semibold text-emerald-500">+1.000M</td>
+              <td class="p-3 text-right font-semibold text-emerald-500">+1.500M</td>
+            </tr>
+            <tr class="border-t border-slate-50">
+              <td class="p-3 text-slate-600">✅ Dừng B0 (mã KM thất thoát)</td>
+              <td class="p-3 text-right font-semibold text-emerald-500">+TBD (đang chảy máu)</td>
+              <td class="p-3 text-right">—</td>
+              <td class="p-3 text-right">—</td>
+            </tr>
+            <tr class="border-t-2 border-slate-300 bg-blue-50">
+              <td class="p-3 font-bold text-slate-800">📊 Lợi ích thuần (mid estimate)</td>
+              <td class="p-3 text-right font-black text-blue-700">+~75M đến +1.275M</td>
+              <td class="p-3 text-right font-black text-blue-700">+~900M đến +2.000M</td>
+              <td class="p-3 text-right font-black text-blue-700">+~1.425M đến +2.625M</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CTO note -->
+    <div class="warning-box p-5 rounded-2xl">
+      <p class="text-sm text-red-700">
+        <i class="fas fa-user-tie mr-2"></i>
+        <strong>Điều kiện tiên quyết:</strong> HSA hiện <strong>chưa có CTO</strong>. Tuyển CTO (50–100 triệu/tháng) là bước đầu tiên và quan trọng nhất. Không có CTO → không có Platform → không có ROI. Mục tiêu onboard CTO: <strong>T8/2026</strong>.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 6 — RỦI RO
+════════════════════════════════════════════ -->
+<section class="py-20 px-6 bg-slate-50">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-12">
+      <span class="section-badge"><i class="fas fa-shield text-red-500"></i> Rủi ro</span>
+      <h2 class="text-4xl font-black text-slate-800 mt-4 mb-3">10 rủi ro chiến lược <span class="text-red-500">đã nhận diện</span></h2>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <div class="card p-6">
+        <canvas id="riskChart" height="300"></canvas>
+      </div>
+      <div class="card p-6">
+        <h3 class="text-base font-bold text-slate-700 mb-4">Rủi ro ưu tiên cao</h3>
+        <div class="space-y-3">
+          <div class="flex items-start gap-3 p-3 bg-red-50 rounded-xl border border-red-100">
+            <span class="text-red-500 text-lg">🔴</span>
+            <div>
+              <div class="font-bold text-slate-700 text-sm">P10 — Chiến lược công nghệ tự phát</div>
+              <p class="text-xs text-slate-500 mt-0.5">HSA đang tìm kiếm phần mềm hoàn toàn tự phát, bị động, vướng đến đâu tìm đến đó. Gây lãng phí tài nguyên, thiếu nhất quán, dễ chệch hướng.</p>
+              <span class="text-xs font-semibold text-red-600 mt-1 block">Giải pháp: CTO làm chủ kiến trúc công nghệ tổng thể</span>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-3 bg-red-50 rounded-xl border border-red-100">
+            <span class="text-red-500 text-lg">🔴</span>
+            <div>
+              <div class="font-bold text-slate-700 text-sm">B0 — Mã khuyến mãi thất thoát</div>
+              <p class="text-xs text-slate-500 mt-0.5">Bất kỳ chuỗi ký tự nào nhập vào ô mã KM đều được giảm tiền. Đang xảy ra real-time.</p>
+              <span class="text-xs font-semibold text-red-600 mt-1 block">Fix ưu tiên: Tuần 1 sau khi CTO onboard</span>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-3 bg-orange-50 rounded-xl border border-orange-100">
+            <span class="text-orange-500 text-lg">🟠</span>
+            <div>
+              <div class="font-bold text-slate-700 text-sm">P5 — Scale × 2 không có hạ tầng</div>
+              <p class="text-xs text-slate-500 mt-0.5">HCM tăng gấp đôi 2026. Onboarding thủ công hiện tại không thể xử lý 780 HS/ngày.</p>
+              <span class="text-xs font-semibold text-orange-600 mt-1 block">Giải pháp: Phase 1 hoàn thành T12/2026</span>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-3 bg-orange-50 rounded-xl border border-orange-100">
+            <span class="text-orange-500 text-lg">🟠</span>
+            <div>
+              <div class="font-bold text-slate-700 text-sm">P9 — Mất dữ liệu không thể cứu vãn</div>
+              <p class="text-xs text-slate-500 mt-0.5">Google Drive cá nhân: nhân viên nghỉ → mất dữ liệu vĩnh viễn. Không backup, không audit.</p>
+              <span class="text-xs font-semibold text-orange-600 mt-1 block">Giải pháp: PostgreSQL HSA là SSOT từ Phase 0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 7 — PHÊ DUYỆT
+════════════════════════════════════════════ -->
+<section id="approval" class="cta-section py-20 px-6">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-12">
+      <span class="text-xs font-bold tracking-widest text-blue-300 uppercase mb-4 block">Đề nghị phê duyệt</span>
+      <h2 class="text-4xl font-black text-white mb-4">3 Quyết định cần BGĐ phê duyệt</h2>
+      <p class="text-blue-200 text-lg">Tháng 7/2026 — trước khi bắt đầu Phase 0</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6 mb-10">
+      <div class="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 text-center">
+        <div class="w-16 h-16 bg-amber-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-user-tie text-slate-900 text-2xl"></i>
+        </div>
+        <div class="text-2xl font-black text-white mb-2">1</div>
+        <div class="font-bold text-white mb-2">Phê duyệt Tuyển CTO</div>
+        <p class="text-blue-200 text-sm mb-3">Mức lương: 50–100 triệu/tháng. Bắt đầu tuyển ngay T7/2026. Mục tiêu onboard T8/2026.</p>
+        <div class="bg-amber-400/20 text-amber-300 text-xs font-bold px-3 py-1.5 rounded-lg">ĐIỀU KIỆN TIÊN QUYẾT</div>
+      </div>
+
+      <div class="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 text-center">
+        <div class="w-16 h-16 bg-sky-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-money-bill-wave text-slate-900 text-2xl"></i>
+        </div>
+        <div class="text-2xl font-black text-white mb-2">2</div>
+        <div class="font-bold text-white mb-2">Phê duyệt Ngân sách Phase 0+1</div>
+        <p class="text-blue-200 text-sm mb-3">~553–913 triệu cho 5 tháng đầu (T8–T12/2026). Bao gồm lương team + hạ tầng + tools.</p>
+        <div class="bg-sky-400/20 text-sky-300 text-xs font-bold px-3 py-1.5 rounded-lg">6 THÁNG ĐẦU</div>
+      </div>
+
+      <div class="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 text-center">
+        <div class="w-16 h-16 bg-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-road text-slate-900 text-2xl"></i>
+        </div>
+        <div class="text-2xl font-black text-white mb-2">3</div>
+        <div class="font-bold text-white mb-2">Phê duyệt Định hướng Platform</div>
+        <p class="text-blue-200 text-sm mb-3">Xác nhận Giải pháp B (MISA + .NET). Giao COO làm Product Owner. CTO chịu trách nhiệm kỹ thuật.</p>
+        <div class="bg-emerald-400/20 text-emerald-300 text-xs font-bold px-3 py-1.5 rounded-lg">ĐỊNH HƯỚNG CHIẾN LƯỢC</div>
+      </div>
+    </div>
+
+    <!-- Action items -->
+    <div class="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6">
+      <h3 class="font-bold text-white text-lg mb-4"><i class="fas fa-list-check mr-2 text-amber-400"></i>Các bước hành động ngay sau phê duyệt</h3>
+      <div class="grid md:grid-cols-2 gap-3">
+        <div class="flex items-center gap-3 text-blue-200 text-sm">
+          <span class="w-6 h-6 bg-amber-400 text-slate-900 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0">1</span>
+          Tuần 1–2: Đăng tin tuyển CTO trên toàn bộ kênh
+        </div>
+        <div class="flex items-center gap-3 text-blue-200 text-sm">
+          <span class="w-6 h-6 bg-amber-400 text-slate-900 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0">2</span>
+          Tuần 2–3: COO viết job description CTO chi tiết
+        </div>
+        <div class="flex items-center gap-3 text-blue-200 text-sm">
+          <span class="w-6 h-6 bg-sky-400 text-slate-900 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0">3</span>
+          Tuần 3: Mở tài khoản MISA SME Online cho kế toán thử nghiệm
+        </div>
+        <div class="flex items-center gap-3 text-blue-200 text-sm">
+          <span class="w-6 h-6 bg-sky-400 text-slate-900 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0">4</span>
+          Tuần 4: COO chuẩn bị Product Backlog Phase 0 để bàn giao CTO
+        </div>
+        <div class="flex items-center gap-3 text-blue-200 text-sm">
+          <span class="w-6 h-6 bg-emerald-400 text-slate-900 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0">5</span>
+          T8/2026: CTO onboard → Fix B0 ngay trong tuần đầu
+        </div>
+        <div class="flex items-center gap-3 text-blue-200 text-sm">
+          <span class="w-6 h-6 bg-emerald-400 text-slate-900 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0">6</span>
+          T8/2026: Tuyển Fullstack Dev + Fresher song song
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-slate-900 py-8 px-6 text-center">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-center gap-3 mb-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-700 to-indigo-600 flex items-center justify-center">
+        <span class="text-white font-black text-xs">HSA</span>
+      </div>
+      <span class="text-slate-400 font-semibold">HSA Education — Đề xuất Chuyển đổi Số 2026</span>
+    </div>
+    <p class="text-slate-500 text-xs">Tài liệu nội bộ · Confidential · Phiên bản 1.0 · Tháng 7/2026</p>
+    <p class="text-slate-600 text-xs mt-2">Tài liệu tham chiếu đầy đủ: docs/01-HSA-BUSINESS-CASE-v1.0.md · docs/02-HSA-PLATFORM-VISION-v1.0.md</p>
+  </div>
+</footer>
+
+<!-- ════════════════════════════════════════════
+     CHARTS JAVASCRIPT
+════════════════════════════════════════════ -->
+<script>
+Chart.register(ChartDataLabels);
+const fontFamily = "'Be Vietnam Pro', sans-serif";
+const defaultFont = { family: fontFamily, size: 12 };
+Chart.defaults.font = defaultFont;
+Chart.defaults.color = '#64748B';
+Chart.defaults.plugins.legend.labels.font = defaultFont;
+
+// ── 1. WASTE COST (Horizontal Bar) ──
+new Chart(document.getElementById('wasteCostChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Nhân lực trực tiếp\n(504h/tháng)', 'Chi phí cơ hội\nGĐ Kinh doanh', 'Doanh thu lỗi\nonboarding (3-5%)', 'Lỗ hổng B0\n(mã KM)'],
+    datasets: [{
+      data: [605, 288, 1000, null],
+      backgroundColor: ['#EF4444CC', '#F97316CC', '#FBBF24CC', '#94A3B8CC'],
+      borderRadius: 8,
+      borderSkipped: false,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      datalabels: {
+        align: 'end', anchor: 'end',
+        formatter: (v) => v ? `${v}M` : 'Đang đo',
+        color: '#374151', font: { weight: '700', size: 11 }
+      },
+      tooltip: { callbacks: { label: (c) => c.raw ? ` ${c.raw} triệu/năm` : ' Đang đo' }}
+    },
+    scales: {
+      x: { grid: { color: '#F1F5F9' }, ticks: { callback: v => `${v}M` }, max: 1400 },
+      y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+// ── 2. ERROR RATE LINE ──
+new Chart(document.getElementById('errorRateChart'), {
+  type: 'line',
+  data: {
+    labels: ['2024\n(20 HS/ngày)', '2025\n(55 HS/ngày)', '2026\n(77 HS/ngày)', '2027\n(101 HS/ngày)', '2027+\nKHÔNG có platform'],
+    datasets: [
+      {
+        label: 'Không có Platform (hiện tại)',
+        data: [1, 3.5, 6.5, 10.5, 15],
+        borderColor: '#EF4444', backgroundColor: '#EF444420',
+        fill: true, tension: 0.4, borderWidth: 2.5,
+        pointBackgroundColor: '#EF4444', pointRadius: 5,
+      },
+      {
+        label: 'Có Platform (tự động hóa)',
+        data: [null, null, 0.5, 0.5, 0.5],
+        borderColor: '#10B981', backgroundColor: '#10B98120',
+        fill: true, tension: 0.4, borderWidth: 2.5, borderDash: [5,3],
+        pointBackgroundColor: '#10B981', pointRadius: 5,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom' },
+      datalabels: { display: false },
+      tooltip: { callbacks: { label: (c) => ` ${c.raw ?? '—'}%` }}
+    },
+    scales: {
+      y: { grid: { color: '#F1F5F9' }, ticks: { callback: v => `${v}%` }, max: 18 },
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+// ── 3. MARKET DOUGHNUT ──
+new Chart(document.getElementById('marketChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['HSA (20K / 7,4% TAM)', 'SAM chưa khai thác (75K)', 'Ngoài SAM (174K)'],
+    datasets: [{
+      data: [20000, 75000, 174000],
+      backgroundColor: ['#1D6FAB', '#38BDF8', '#E2E8F0'],
+      borderWidth: 2, borderColor: '#fff',
+      hoverOffset: 6
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '62%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, font: { size: 11 } } },
+      datalabels: {
+        formatter: (v, ctx) => {
+          const pct = ((v / 269000) * 100).toFixed(1);
+          return `${(v/1000).toFixed(0)}K\n(${pct}%)`;
+        },
+        color: '#fff', font: { weight: '700', size: 11 },
+        display: (ctx) => ctx.dataIndex < 2
+      },
+      tooltip: { callbacks: { label: (c) => ` ${c.label}: ${(c.raw/1000).toFixed(0)}K học sinh` }}
+    }
+  }
+});
+
+// ── 4. GROWTH BAR ──
+new Chart(document.getElementById('growthChart'), {
+  type: 'bar',
+  data: {
+    labels: ['2025', '2026', '2027'],
+    datasets: [
+      {
+        label: 'Hà Nội',
+        data: [12000, 12000, 13000],
+        backgroundColor: '#1D4ED8CC',
+        borderRadius: { topLeft: 0, topRight: 0, bottomLeft: 8, bottomRight: 8 },
+        borderSkipped: false,
+      },
+      {
+        label: 'TP.HCM',
+        data: [8000, 16000, 24000],
+        backgroundColor: '#38BDF8CC',
+        borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
+        borderSkipped: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom' },
+      datalabels: {
+        display: (ctx) => ctx.dataset.label === 'TP.HCM',
+        anchor: 'end', align: 'top',
+        formatter: (v, ctx) => {
+          const total = ctx.chart.data.datasets.reduce((s, d) => s + d.data[ctx.dataIndex], 0);
+          return `${(total/1000).toFixed(0)}K`;
+        },
+        color: '#1D4ED8', font: { weight: '800', size: 13 }
+      },
+      tooltip: {
+        callbacks: {
+          footer: (items) => `Tổng: ${items.reduce((s,i) => s + i.raw, 0).toLocaleString()} HS`
+        }
+      }
+    },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, grid: { color: '#F1F5F9' }, ticks: { callback: v => `${v/1000}K` } }
+    }
+  }
+});
+
+// ── 5. ROI LINE ──
+new Chart(document.getElementById('roiChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Năm 1\n(2026–27)', 'Năm 2\n(2027–28)', 'Năm 3\n(2028–29)'],
+    datasets: [
+      {
+        label: 'Đầu tư (nhân sự tech)',
+        data: [1680, 1680, 1680],
+        backgroundColor: '#EF444488',
+        borderColor: '#EF4444',
+        borderWidth: 1.5,
+        borderRadius: 8,
+        borderSkipped: false,
+      },
+      {
+        label: 'Lợi ích (tiết kiệm + doanh thu)',
+        data: [1275, 2000, 2725],
+        backgroundColor: '#10B98188',
+        borderColor: '#10B981',
+        borderWidth: 1.5,
+        borderRadius: 8,
+        borderSkipped: false,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom' },
+      datalabels: {
+        anchor: 'end', align: 'top',
+        formatter: v => `${v}M`,
+        color: '#374151', font: { weight: '700', size: 11 }
+      },
+      tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${c.raw}M` }}
+    },
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: { color: '#F1F5F9' }, ticks: { callback: v => `${v}M` }, max: 3200 }
+    }
+  }
+});
+
+// ── 6. TEAM COST DONUT ──
+new Chart(document.getElementById('teamChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['CTO (75M TB)', 'Fullstack Dev (35M TB)', 'Fresher (15M)', 'UI/UX + QC (15M TB)'],
+    datasets: [{
+      data: [75, 35, 15, 15],
+      backgroundColor: ['#1D4ED8', '#0EA5E9', '#10B981', '#F59E0B'],
+      borderWidth: 2, borderColor: '#fff', hoverOffset: 6
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '58%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } },
+      datalabels: {
+        formatter: (v) => `${v}M`,
+        color: '#fff', font: { weight: '700', size: 12 }
+      },
+      tooltip: { callbacks: { label: (c) => ` ${c.label}` }}
+    }
+  }
+});
+
+// ── 7. RISK RADAR ──
+new Chart(document.getElementById('riskChart'), {
+  type: 'radar',
+  data: {
+    labels: ['B0 Mã KM', 'P10 Tech tự phát', 'P5 Scale ×2', 'P9 Mất dữ liệu', 'B1 SePay', 'P3 Phụ huynh', 'P1 Đà Nẵng', 'R2 CTO Dependency'],
+    datasets: [
+      {
+        label: 'Mức độ rủi ro (1–5)',
+        data: [5, 5, 4, 4, 4, 3, 2, 4],
+        backgroundColor: '#EF444430',
+        borderColor: '#EF4444',
+        borderWidth: 2,
+        pointBackgroundColor: '#EF4444',
+        pointRadius: 4,
+      },
+      {
+        label: 'Sau khi có Platform',
+        data: [1, 1, 1, 1, 1, 2, 2, 2],
+        backgroundColor: '#10B98130',
+        borderColor: '#10B981',
+        borderWidth: 2,
+        pointBackgroundColor: '#10B981',
+        pointRadius: 4,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom' },
+      datalabels: { display: false }
+    },
+    scales: {
+      r: {
+        min: 0, max: 5,
+        ticks: { stepSize: 1, display: false },
+        grid: { color: '#E2E8F0' },
+        pointLabels: { font: { size: 10, weight: '600' }, color: '#475569' }
+      }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
