@@ -360,6 +360,85 @@ Ký hiệu: ✅ có quyền/sử dụng · ❌ không · 🔜 giai đoạn sau.
 
 ---
 
-> **Phê duyệt:** Tài liệu này cần BGĐ phê duyệt **định hướng (Section 1, 4, 6, 7, 8)** và CTO xác nhận **tính khả thi kỹ thuật (Section 5, 9, 10)** trước khi khởi động Phase 0.
+# 11. AI & BIGDATA — CƠ HỘI VÀ LỘ TRÌNH
+
+HSA Education không chỉ vận hành một trung tâm ôn luyện — với quy mô 20.000 học sinh/năm (2025) tăng lên ~37.000 vào 2027, qua 4 kỳ thi (ĐGNL HSA, ĐGNL HCM, BCA, BQP) và 2 cơ sở Hà Nội + TP.HCM, HSA đang ngồi trên một mỏ dữ liệu hành vi học tập và tuyển sinh thuộc loại lớn nhất thị trường EdTech ôn luyện Việt Nam. HSA Platform chính là công cụ biến mỏ dữ liệu đó thành lợi thế cạnh tranh bền vững thông qua AI và BigData.
+
+Phần này trả lời 4 yêu cầu của BGĐ từ cuộc họp: (1) tự động hóa review Sale & CTV bằng AI, (2) chăm sóc khách hàng tự động bằng AI, (3) BigData phân tích hành vi học sinh, (4) phân tích sâu cơ hội AI+BigData trong business model HSA.
+
+## 11.1 Dữ liệu HSA sở hữu — tài sản chiến lược
+
+Khi HSA Platform đi vào hoạt động, mỗi tương tác của học sinh, phụ huynh, Sale và CTV đều để lại dấu vết số. Đây là các nhóm dữ liệu HSA sẽ thu thập một cách có hệ thống (thay vì rải rác trên Google Sheet, EZSale, Drive như hiện tại):
+
+- **Behavioral data (hành vi sử dụng):** thời điểm học sinh login (sáng/trưa/tối, ngày thường/cuối tuần), tổng thời gian ôn luyện mỗi phiên, số câu hỏi làm/ngày, tốc độ làm bài (giây/câu), pattern đúng/sai theo dạng câu, tỉ lệ bỏ dở giữa chừng một đề.
+- **Learning data (kết quả học tập):** điểm mock exam tách theo chủ đề/môn con (Toán, Văn, Khoa học, Tiếng Anh…), tiến bộ điểm số theo tuần, điểm yếu cố hữu theo dạng bài, độ ổn định điểm qua nhiều lần thi thử.
+- **Conversion data (chuyển đổi tuyển sinh):** nguồn lead (Zalo, Facebook, CTV, referral, walk-in), thời gian từ lead → chốt (lead time), số lần tương tác với Sale trước khi chốt, kênh nào có chi phí/chuyển đổi tốt nhất, tỉ lệ rơi ở từng bước phễu.
+- **CTV data (cộng tác viên):** conversion rate của từng CTV trong 132–137 CTV, loại nội dung CTV share hiệu quả nhất, thời điểm CTV active, referral chain (CTV nào giới thiệu CTV nào), độ bền hoạt động.
+- **Payment data (thanh toán — qua SePay/Odoo):** gói học bán chạy nhất theo mùa, tỉ lệ hoàn tiền theo gói, pattern thanh toán trả góp vs trả thẳng, độ trễ thanh toán, gói nào hay bị huỷ.
+- **Engagement data (tương tác Zalo OA):** tỉ lệ mở tin nhắn, tỉ lệ click link, tỉ lệ phản hồi; buổi học nào học sinh vắng nhiều nhất (qua điểm danh ClassIn), khung giờ phụ huynh phản hồi nhanh nhất.
+- **Family data (quan hệ gia đình):** gia đình nào có nhiều con em cùng học HSA, tỉ lệ siblings convert (anh/chị học rồi giới thiệu em), giá trị vòng đời theo hộ gia đình.
+
+> **Định hướng:** Khi Platform đủ trưởng thành (12–18 tháng vận hành thực tế), HSA sẽ có một **data warehouse** tập trung trên PostgreSQL với khối lượng và độ sạch đủ để **train model riêng** (cho bài toán dự đoán) hoặc **fine-tune LLM** (cho chăm sóc và tư vấn theo ngữ cảnh HSA). Dữ liệu là tài sản tích lũy — bắt đầu thu thập sạch ngay từ Phase 1 sẽ quyết định năng lực AI ở Phase 4–5.
+
+## 11.2 AI cho Sale & CTV — tự động hóa review và coaching
+
+### A. AI Review Sale
+
+- **Call analysis (phân tích cuộc gọi):** tích hợp ghi âm cuộc gọi tư vấn → AI transcribe và phân tích: tỉ lệ % thời gian Sale nói vs nghe (talk-to-listen ratio), các từ khóa phủ nhận/do dự của học sinh ("đắt", "để suy nghĩ", "hỏi bố mẹ đã"), Sale có chủ động hỏi về nhu cầu/kỳ thi mục tiêu không, có tạo cảm giác deadline (sắp hết ưu đãi, sắp đầy lớp) không → tự động cho điểm theo **rubric chuẩn** → gửi báo cáo tuần cho Sale Manager kèm trích đoạn cần cải thiện.
+- **Pipeline intelligence:** AI phát hiện deal sắp "chết lạnh" (không có activity 3+ ngày), tự động nhắc Sale và **gợi ý next best action** dựa trên các deal tương tự đã thắng trong lịch sử (ví dụ: "lead nguồn CTV, quan tâm BCA, đã làm mock — nên gửi điểm chuẩn năm trước + mời thi thử miễn phí").
+- **Conversion predictor:** dự đoán xác suất chốt của từng lead dựa trên nguồn lead, thời gian phản hồi đầu tiên, kỳ thi quan tâm, điểm mock (nếu đã làm), số lần tương tác → Sale ưu tiên thời gian cho lead xác suất cao, không lãng phí vào lead "đông lạnh".
+
+### B. AI Review CTV
+
+- Phân tích nội dung CTV share để xác định **loại nào dẫn đến conversion cao hơn** (video vs text vs hình ảnh, kỳ thi nào, thông điệp gì) → đúc kết "content playbook" và phân phối lại cho toàn đội CTV.
+- Tự động **phân tier CTV theo performance thực tế** (conversion rate, doanh thu mang về) thay vì chỉ đếm số lượng referral → gợi ý uplift plan riêng cho từng tier (đào tạo, thưởng, cấp tài nguyên).
+- Phát hiện **CTV inactive sắp churn** (giảm hoạt động, dừng share) → tự động trigger re-engagement campaign (nhắc thưởng, gửi content mới, mời sự kiện).
+
+### C. AI Chăm sóc khách hàng tự động
+
+- **AI Chatbot học vụ (Zalo OA):** trả lời ~80% câu hỏi thường gặp (lịch thi, số báo danh, link ClassIn, lịch học, học phí) bằng ngôn ngữ tự nhiên, chỉ escalate lên Quản lý lớp (QLL) khi câu hỏi phức tạp/nhạy cảm — train trên FAQ HSA + lịch sử ticket. Đây là bước nhảy so với rule-based template hiện tại.
+- **Proactive care (chăm sóc chủ động):** AI phát hiện học sinh có nguy cơ drop-out (vắng 2+ buổi liên tiếp theo điểm danh ClassIn, điểm mock đi xuống, không login platform 5+ ngày) → tự động gửi Zalo cá nhân hóa động viên + alert QLL/Sale để can thiệp kịp thời trước khi học sinh bỏ hẳn.
+- **Parent engagement (gắn kết phụ huynh):** AI tự tóm tắt tuần học của con và gửi Zalo cho phụ huynh mỗi cuối tuần (không cần QLL soạn tay) — ví dụ: *"Tuần này con học 4/5 buổi, điểm mock trung bình 78/100 (tăng 6 điểm), môn yếu nhất là Khoa học tự nhiên, gợi ý con ôn thêm chuyên đề Vật lý sóng cuối tuần này."*
+
+## 11.3 BigData phân tích hành vi học sinh
+
+Với quy mô hàng chục nghìn học sinh, BigData cho phép HSA nhìn ra những quy luật không thể thấy bằng mắt thường:
+
+1. **Cohort retention analysis:** học sinh từ kênh nào (Zalo, Facebook, CTV, referral) giữ chân tốt nhất, không bỏ giữa chừng? Kỳ thi nào (HSA/HCM/BCA/BQP) có drop-out cao nhất? → điều chỉnh ngân sách tuyển sinh và thiết kế chương trình giữ chân.
+2. **Learning pattern clustering:** phân nhóm học sinh theo hành vi học (sáng sớm vs tối muộn; đều đặn vs dồn sát ngày thi; tự học cao vs phụ thuộc lớp trực tiếp) → thiết kế gói học và lịch nhắc phù hợp từng nhóm.
+3. **Exam readiness prediction:** dựa trên kết quả mock + tỉ lệ điểm danh + tổng thời gian ôn → dự đoán xác suất pass kỳ thi thật → alert sớm cho học sinh và giảng viên những trường hợp "đang trượt khỏi đường ray".
+4. **Content effectiveness:** bài giảng nào / giảng viên nào khiến học sinh làm mock tốt nhất sau đó? → tối ưu phân công 70 giảng viên và nội dung theo dữ liệu thay vì cảm tính.
+5. **Seasonal demand forecasting:** dự đoán số lượng đăng ký theo tháng (dựa trên 3–5 năm lịch sử + lịch thi ĐGNL chính thức) → chủ động mở lớp, tuyển thêm CTV, tăng capacity hạ tầng trước mùa cao điểm thay vì chữa cháy.
+6. **Price elasticity:** gói học nào, mức giá nào, thời điểm khuyến mãi nào cho conversion cao nhất → tối ưu pricing strategy và lịch chạy ưu đãi theo dữ liệu thực.
+
+## 11.4 Lộ trình AI/BigData theo Phase
+
+AI không phải thứ "bật công tắc là có" — nó phụ thuộc vào lượng dữ liệu tích lũy. Lộ trình dưới đây đồng bộ với các Phase phát triển Platform và gắn yêu cầu dữ liệu tối thiểu cho từng deliverable:
+
+| Phase | Thời gian | AI/BigData deliverable | Yêu cầu dữ liệu tối thiểu |
+|---|---|---|---|
+| **Phase 1–2** | T10/2026–T4/2027 | Thu thập dữ liệu sạch (không thiếu, không trùng) vào PostgreSQL; báo cáo KPI cơ bản cho BGĐ | 3 tháng data |
+| **Phase 3** | T5–9/2027 | Dashboard BigData: cohort analysis, conversion funnel, mock exam analytics; Zalo chatbot FAQ cơ bản (rule-based + GPT API) | 6–9 tháng data |
+| **Phase 4** | T10/2027–T3/2028 | Proactive care AI (drop-out predictor), pipeline intelligence cho Sale, CTV performance analytics, parent weekly summary tự động | 12 tháng data |
+| **Phase 5** | T4–9/2028 | Call analysis AI, conversion predictor, exam readiness score, learning path personalization, seasonal forecasting | 18–24 tháng data |
+
+## 11.5 Công nghệ AI — Build vs API
+
+Quyết định công nghệ phải tối ưu chi phí và tốc độ triển khai — không phải mọi bài toán đều cần LLM, và không bài toán nào cần HSA tự xây model nền tảng:
+
+| Ứng dụng | Phương án | Lý do |
+|---|---|---|
+| Chatbot FAQ học vụ | **OpenAI API / Claude API** (gọi từ .NET 10) | Không cần train; context HSA đưa vào system prompt; triển khai nhanh ngay Phase 3 |
+| Proactive care / drop-out predictor | **Scikit-learn / XGBoost** (Python microservice) | Dữ liệu tabular (điểm danh, mock score, login frequency) → classical ML đủ, không cần LLM |
+| Phân tích cohort / funnel | **SQL + dbt + Metabase/Superset** | Không cần AI — BigData analytics thuần, đủ mạnh và rẻ |
+| Call analysis (Sale) | **OpenAI Whisper + GPT-4** | Transcription + phân tích hội thoại; gọi API theo batch sau mỗi ngày |
+| Conversion predictor | **Logistic regression → Gradient Boosting** | Train trên lịch sử CRM; retrain mỗi tháng tự động qua Hangfire |
+| Learning path personalization | **Collaborative filtering (Phase 5)** | Cần 12+ tháng data đủ lớn để collaborative filtering có ý nghĩa |
+
+> **Nguyên tắc cốt lõi:** KHÔNG tự xây model LLM. Gọi OpenAI/Anthropic API cho các tác vụ NLP (chatbot, call analysis, tóm tắt); tự xây model nhỏ (scikit-learn/XGBoost) cho các tác vụ dự đoán trên dữ liệu tabular. Đầu tư vào **data pipeline sạch** trước, AI sau — không có dữ liệu sạch thì mọi model đều vô nghĩa (rác vào, rác ra).
+
+---
+
+> **Phê duyệt:** Tài liệu này cần BGĐ phê duyệt **định hướng (Section 1, 4, 6, 7, 8, 11)** và CTO xác nhận **tính khả thi kỹ thuật (Section 5, 9, 10)** trước khi khởi động Phase 0.
 
 *— Hết tài liệu HSA-PV-v1.0 —*
